@@ -47,7 +47,7 @@
 				<height>35</height>
 				<align>left</align>
 				<aligny>center</aligny>
-				<label>[COLOR=green][B]$LOCALIZE[31001][/B][/COLOR][CR]$LOCALIZE[20186]!</label>
+				<label>[COLOR=green][B]$LOCALIZE[31001][/B][/COLOR]</label>
 				<font>font11</font>
 			</control>
 		</control>

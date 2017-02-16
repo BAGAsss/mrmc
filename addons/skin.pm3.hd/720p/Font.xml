@@ -119,4 +119,65 @@
 			<aspect>.8</aspect>
 		</font>
 	</fontset>
+	<fontset id="Arial Big" unicode="true">
+	 	<font>
+			<name>font10</name>
+			<filename>arial.ttf</filename>
+			<size>22</size>
+		</font>
+	 	<font>
+			<name>font11</name>
+			<filename>arial.ttf</filename>
+			<size>29</size>
+		</font>
+	 	<font>
+			<name>font12</name>
+			<filename>arial.ttf</filename>
+			<size>30</size>
+		</font>
+	 	<font>
+			<name>font12b</name>
+			<filename>arial.ttf</filename>
+			<size>30</size>
+			<aspect>.9</aspect>
+		</font>
+	 	<font>
+			<name>font13</name>
+			<filename>arial.ttf</filename>
+			<size>33</size>
+		</font>
+	 	<font>
+			<name>font18</name>
+			<filename>arial.ttf</filename>
+			<size>38</size>
+			<aspect>.8</aspect>
+		</font>
+	 	<font>
+			<name>font18b</name>
+			<filename>arial.ttf</filename>
+			<size>38</size>
+			<aspect>.8</aspect>
+		</font>
+	 	<font>
+			<name>font20</name>
+			<filename>arial.ttf</filename>
+			<size>35</size>
+		</font>
+	 	<font>
+			<name>font22</name>
+			<filename>arial.ttf</filename>
+			<size>38</size>
+		</font>
+	 	<font>
+			<name>font25</name>
+			<filename>arial.ttf</filename>
+			<size>45</size>
+		</font>
+	 	<font>
+			<name>font35b</name>
+			<filename>arial.ttf</filename>
+			<size>80</size>
+			<aspect>.8</aspect>
+		</font>
+	</fontset>
 </fonts>

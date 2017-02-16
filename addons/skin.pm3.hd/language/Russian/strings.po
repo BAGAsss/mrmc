@@ -232,3 +232,22 @@ msgctxt "#39001"
 msgid "Settings Level"
 msgstr "Уровень настроек"
 
+msgctxt "#39002"
+msgid "Use smart-playlists on home screen"
+msgstr "Использовать смарт-плейлисты на главном экране"
+
+msgctxt "#39003"
+msgid "Smart-playlist"
+msgstr "Имя смарт-плейлиста"
+
+msgctxt "#39004"
+msgid "Use smart-playlist"
+msgstr "Использовать смарт-плейлист"
+
+msgctxt "#39005"
+msgid "Smart-playlist"
+msgstr "Смарт-плейлист"
+
+msgctxt "#39006"
+msgid "path"
+msgstr "находится"

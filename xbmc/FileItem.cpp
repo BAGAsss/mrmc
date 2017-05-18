@@ -405,6 +405,10 @@ const CFileItem& CFileItem::operator=(const CFileItem& item)
   m_specialSort = item.m_specialSort;
   m_bIsAlbum = item.m_bIsAlbum;
   m_doContentLookup = item.m_doContentLookup;
+  m_strServiceId = item.m_strServiceId;
+  m_strServiceFile = item.m_strServiceFile;
+  m_strServiceExtras = item.m_strServiceExtras;
+
   return *this;
 }
 
@@ -460,6 +464,11 @@ void CFileItem::Reset()
   delete m_pictureInfoTag;
   m_pictureInfoTag=NULL;
   m_extrainfo.clear();
+  m_strServiceId.clear();
+  m_strServiceFile.clear();
+  m_strServiceExtras.clear();
+
+
   ClearProperties();
 
   Initialize();
@@ -495,6 +504,9 @@ void CFileItem::Archive(CArchive& ar)
     ar << m_extrainfo;
     ar << m_specialSort;
     ar << m_doContentLookup;
+    ar << m_strServiceId;
+    ar << m_strServiceFile;
+    ar << m_strServiceExtras;
 
     if (m_musicInfoTag)
     {
@@ -553,6 +565,9 @@ void CFileItem::Archive(CArchive& ar)
     ar >> temp;
     m_specialSort = (SortSpecial)temp;
     ar >> m_doContentLookup;
+    ar >> m_strServiceId;
+    ar >> m_strServiceFile;
+    ar >> m_strServiceExtras;
 
     int iType;
     ar >> iType;
@@ -1361,12 +1376,20 @@ bool CFileItem::IsSamePath(const CFileItem *item) const
   {
     if (item->IsMediaServiceBased())
     {
-      if (!m_videoInfoTag->m_strServiceId.empty() && !item->m_videoInfoTag->m_strServiceId.empty())
-        return (m_videoInfoTag->m_strServiceId == item->m_videoInfoTag->m_strServiceId);
+      if (!m_strServiceId.empty() && !item->GetMediaServiceId().empty())
+        return (m_strServiceId == item->GetMediaServiceId());
     }
     if (m_videoInfoTag->m_iDbId != -1 && item->m_videoInfoTag->m_iDbId != -1)
       return ((m_videoInfoTag->m_iDbId == item->m_videoInfoTag->m_iDbId) &&
         (m_videoInfoTag->m_type == item->m_videoInfoTag->m_type));        
+  }
+  if (HasMusicInfoTag() && item->HasMusicInfoTag())
+  {
+    if (item->IsMediaServiceBased())
+    {
+      if (!m_strServiceId.empty() && !item->GetMediaServiceId().empty())
+        return (m_strServiceId == item->GetMediaServiceId());
+    }
   }
   if (IsMusicDb() && HasMusicInfoTag())
   {
@@ -1436,10 +1459,11 @@ void CFileItem::UpdateInfo(const CFileItem &item, bool replaceLabels /*=true*/)
     SetLabel(item.GetLabel());
   if (replaceLabels && !item.GetLabel2().empty())
     SetLabel2(item.GetLabel2());
-  if (!item.GetArt("thumb").empty())
-    SetArt("thumb", item.GetArt("thumb"));
-  if (!item.GetIconImage().empty())
-    SetIconImage(item.GetIconImage());
+
+  SetArt("thumb", item.GetArt("thumb"));
+  SetIconImage(item.GetIconImage());
+  SetArt("fanart", item.GetArt("fanart"));
+
   AppendProperties(item);
 }
 
@@ -1874,6 +1898,7 @@ bool CFileItemList::Copy(const CFileItemList& items, bool copyItems /* = true */
   m_replaceListing  = items.m_replaceListing;
   m_content         = items.m_content;
   m_mapProperties   = items.m_mapProperties;
+  m_fastLookup      = items.m_fastLookup;
   m_cacheToDisc     = items.m_cacheToDisc;
   m_sortDetails     = items.m_sortDetails;
   m_sortDescription = items.m_sortDescription;
@@ -2659,14 +2684,14 @@ bool CFileItemList::Save(int windowID)
   if (iSize <= 0)
     return false;
 
-  CLog::Log(LOGDEBUG,"Saving fileitems [%s]", CURL::GetRedacted(GetPath()).c_str());
+  //CLog::Log(LOGDEBUG,"Saving fileitems [%s]", CURL::GetRedacted(GetPath()).c_str());
 
   CFile file;
   if (file.OpenForWrite(GetDiscFileCache(windowID), true)) // overwrite always
   {
     CArchive ar(&file, CArchive::store);
     ar << *this;
-    CLog::Log(LOGDEBUG,"  -- items: %i, sort method: %i, ascending: %s", iSize, m_sortDescription.sortBy, m_sortDescription.sortOrder == SortOrderAscending ? "true" : "false");
+    //CLog::Log(LOGDEBUG,"  -- items: %i, sort method: %i, ascending: %s", iSize, m_sortDescription.sortBy, m_sortDescription.sortOrder == SortOrderAscending ? "true" : "false");
     ar.Close();
     file.Close();
     return true;
@@ -2680,7 +2705,7 @@ void CFileItemList::RemoveDiscCache(int windowID) const
   std::string cacheFile(GetDiscFileCache(windowID));
   if (CFile::Exists(cacheFile))
   {
-    CLog::Log(LOGDEBUG,"Clearing cached fileitems [%s]",GetPath().c_str());
+    //CLog::Log(LOGDEBUG,"Clearing cached fileitems [%s]",GetPath().c_str());
     CFile::Delete(cacheFile);
   }
 }

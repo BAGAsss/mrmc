@@ -40,6 +40,7 @@
 #include "settings/MediaSettings.h"
 #include "settings/MediaSourceSettings.h"
 #include "settings/Settings.h"
+#include "services/ServicesManager.h"
 #include "input/Key.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/log.h"
@@ -251,10 +252,17 @@ bool CGUIWindowVideoNav::OnMessage(CGUIMessage& message)
       }
       else if (iControl == CONTROL_UPDATE_LIBRARY)
       {
-        if (!g_application.IsVideoScanning())
-            OnScan("");
+        if (m_vecItems->IsMediaServiceBased())
+        {
+          CServicesManager::GetInstance().UpdateMediaServicesLibraries(*m_vecItems);
+        }
         else
-          g_application.StopVideoScan();
+        {
+          if (!g_application.IsVideoScanning())
+              OnScan("");
+          else
+            g_application.StopVideoScan();
+        }
         return true;
       }
     }
@@ -384,6 +392,7 @@ bool CGUIWindowVideoNav::GetDirectory(const std::string &strDirectory, CFileItem
   items.ClearProperties();
 
   // we need to remove cache
+  //if (!URIUtils::IsEmby(strDirectory) || URIUtils::IsServices(strDirectory))
   items.RemoveDiscCache(GetID());
 
   bool bResult = CGUIWindowVideoBase::GetDirectory(strDirectory, items);
@@ -1299,7 +1308,7 @@ std::string CGUIWindowVideoNav::GetStartFolder(const std::string &dir)
   {
     StringUtils::Replace(lower, "movie", "");
     if (CServicesManager::GetInstance().HasServices())
-      return "plex://movies/" + lower + "/";
+      return "services://movies/" + lower + "/";
     return "videodb://movies/" + lower + "/";
   }
   else if (lower == "movietags")
@@ -1314,31 +1323,31 @@ std::string CGUIWindowVideoNav::GetStartFolder(const std::string &dir)
   {
     StringUtils::Replace(lower, "tvshow", "");
     if (CServicesManager::GetInstance().HasServices())
-      return "plex://tvshows/" + lower + "/";
+      return "services://tvshows/" + lower + "/";
     return "videodb://tvshows/" + lower + "/";
   }
   else if (lower == "recentlyaddedmovies")
   {
     if (CServicesManager::GetInstance().HasServices())
-      return "plex://movies/recentlyaddedmovies/";
+      return "services://movies/recentlyaddedmovies/";
     return "videodb://recentlyaddedmovies/";
   }
   else if (lower == "recentlyaddedepisodes")
   {
     if (CServicesManager::GetInstance().HasServices())
-      return "plex://tvshows/recentlyaddedepisodes/";
+      return "services://tvshows/recentlyaddedepisodes/";
     return "videodb://recentlyaddedepisodes/";
   }
   else if (lower == "inprogressshows")
   {
     if (CServicesManager::GetInstance().HasServices())
-      return "plex://tvshows/inprogressshows/";
+      return "services://tvshows/inprogressshows/";
     return "library://video/inprogressshows.xml/";
   }
   else if (lower == "inprogressmovies")
   {
     if (CServicesManager::GetInstance().HasServices())
-      return "plex://movies/inprogressmovies/";
+      return "services://movies/inprogressmovies/";
     return "library://video/inprogressmovies.xml/";
   }
   else if (lower == "tvshowtags")

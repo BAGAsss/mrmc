@@ -89,6 +89,7 @@ namespace XFILE
       void SetReferer(const std::string& referer)                { m_referer = referer; }
       void SetCookie(const std::string& cookie)                  { m_cookie = cookie; }
       void SetMimeType(std::string mimetype)                     { SetRequestHeader("Content-Type", mimetype); }
+      void SetSilent(bool silent)                                { m_silent = silent; };
       void SetRequestHeader(const std::string& header, const std::string& value);
       void SetRequestHeader(const std::string& header, long value);
       int  GetResponseCode()                                     { return m_httpresponse; };
@@ -197,6 +198,8 @@ namespace XFILE
       bool            m_postdataset;
 
       CRingBuffer     m_buffer;           // our ringhold buffer
+      char           *m_readbuffer;
+      int             m_readbuffersize;
       char *          m_overflowBuffer;   // in the rare case we would overflow the above buffer
       unsigned int    m_overflowSize;     // size of the overflow buffer
 
@@ -206,5 +209,6 @@ namespace XFILE
       MAPHTTPHEADERS m_requestheaders;
 
       long            m_httpresponse;
+      bool            m_silent;
   };
 }

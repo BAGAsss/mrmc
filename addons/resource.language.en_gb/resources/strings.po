@@ -3006,7 +3006,19 @@ msgctxt "#680"
 msgid "Verbose logging for the [B]Video[/B] component"
 msgstr ""
 
-#empty strings from id 681 to 699
+msgctxt "#681"
+msgid "Recently added"
+msgstr ""
+
+msgctxt "#682"
+msgid "In Progress"
+msgstr ""
+
+msgctxt "#683"
+msgid "Both if possible"
+msgstr ""
+
+#empty strings from id 684 to 699
 
 msgctxt "#700"
 msgid "Cleaning up library"
@@ -3021,11 +3033,11 @@ msgid "This path has been scanned before"
 msgstr ""
 
 msgctxt "#703"
-msgid "Display In Progress items on home screen"
+msgid "Home screen items"
 msgstr ""
 
 msgctxt "#704"
-msgid "Selecting this will display In Progress items on home screen instead of Recently Added"
+msgid "Select which items should be shown on home screen. Recently added, In Progress or Both if possible. Both can only be shown on certain skins"
 msgstr ""
 
 msgctxt "#705"
@@ -4268,7 +4280,6 @@ msgctxt "#1235"
 msgid "Programs & pictures & video"
 msgstr ""
 
-
 #: system/settings/settings.xml
 msgctxt "#1236"
 msgid "Plex client"
@@ -4991,7 +5002,77 @@ msgctxt "#2104"
 msgid "Check the log for more information."
 msgstr ""
 
-#empty strings from id 2105 to 9999
+#: system/settings/settings.xml
+msgctxt "#2105"
+msgid "Emby client"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2106"
+msgid "Enable Emby server sign-in/discovery"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2107"
+msgid "Emby Manual Sign-in (local)"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2108"
+msgid "Emby Manual Sign-in (via local broadcast)"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2109"
+msgid "Emby Pin Request Sign-in"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2110"
+msgid "Emby Pin Request Sign-in (via https://emby.media/pin)"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2111"
+msgid "Emby Servers Sources"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2112"
+msgid "Emby Servers Sources"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2113"
+msgid "Limit Home Shelf to selected Emby servers"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2114"
+msgid "Only selected Emby servers will be displayed in Home Shelf, recently added and in progress"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2115"
+msgid "Sign-in"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2116"
+msgid "Sign-out"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2117"
+msgid "From your computer, go to this url"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2118"
+msgid "https://emby.media/pin and enter this code -> "
+msgstr ""
+
+#empty strings from id 2119 to 9999
 
 #: xbmc/guilib/WindowIDs.h
 msgctxt "#10000"
@@ -7073,7 +7154,12 @@ msgctxt "#13459"
 msgid "Use OMXPlayer for decoding of video files."
 msgstr ""
 
-#empty strings from id 13460 to 13504
+#: system/settings/settings.xml
+msgctxt "#13460"
+msgid "Allow interlaced content"
+msgstr ""
+
+#empty strings from id 13461 to 13504
 
 #: system/settings/settings.xml
 msgctxt "#13505"
@@ -11488,7 +11574,10 @@ msgctxt "#20173"
 msgid "FTP server"
 msgstr ""
 
-#empty string with id 20174
+#: xbmc/network/GUIDialogNetworkSetup.cpp
+msgctxt "#20174"
+msgid "Emby server (http)"
+msgstr ""
 
 #: xbmc/network/GUIDialogNetworkSetup.cpp
 msgctxt "#20175"
@@ -11525,6 +11614,11 @@ msgstr ""
 
 msgctxt "#20183"
 msgid "Reload skin"
+msgstr ""
+
+#: xbmc/network/GUIDialogNetworkSetup.cpp
+msgctxt "#20184"
+msgid "Emby server (https)"
 msgstr ""
 
 #empty string with id 20184
@@ -11706,7 +11800,23 @@ msgctxt "#20262"
 msgid "Zeroconf browser"
 msgstr ""
 
-#empty strings from id 20263 to 20299
+msgctxt "#20263"
+msgid "New Skin"
+msgstr ""
+
+msgctxt "#20264"
+msgid "MrMC has new default skin, would you like to switch to it?"
+msgstr ""
+
+msgctxt "#20265"
+msgid "In future, if you would like to go back to %s skin,"
+msgstr ""
+
+msgctxt "#20266"
+msgid "please use System -> Apearance menu"
+msgstr ""
+
+#empty strings from id 20267 to 20299
 
 #: xbmc/network/GUIDialogNetworkSetup.cpp
 msgctxt "#20300"
@@ -15698,7 +15808,41 @@ msgctxt "#34128"
 msgid "192.0"
 msgstr ""
 
-#empty strings from id 34129 to 34200
+#. Stream Silence Noise Factor Index
+#: system/settings/settings.xml
+msgctxt "#34129"
+msgid "Default"
+msgstr ""
+
+#. Stream Silence Noise Factor Index
+#: system/settings/settings.xml
+msgctxt "#34130"
+msgid "2 times less"
+msgstr ""
+
+#. Stream Silence Noise Factor Index
+#: system/settings/settings.xml
+msgctxt "#34131"
+msgid "10 times less"
+msgstr ""
+
+#. Stream Silence Noise Factor Index
+#: system/settings/settings.xml
+msgctxt "#34132"
+msgid "100 times less"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#34133"
+msgid "Level of inaudible silence"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#34134"
+msgid "Select the level of inaudible signal is output to keep the receiveing audio device alive"
+msgstr ""
+
+#empty strings from id 34135 to 34200
 #34129-34200 reserved for future use
 
 #: xbmc\PlayListPlayer.cpp
@@ -18471,7 +18615,17 @@ msgctxt "#36630"
 msgid "This can help on bad connections to keep the cache filled. It will also greatly speed up buffering"
 msgstr ""
 
-#empty strings from id 36609 to 36899
+#: system/settings/settings.xml
+msgctxt "#36631"
+msgid "Allow hardware decoding of interlaced files."
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#36632"
+msgid "Timeout in seconds for MySQL connections"
+msgstr ""
+
+#empty strings from id 36633 to 36899
 
 #: xbmc/media/MediaType.cpp
 msgctxt "#36900"
@@ -18810,8 +18964,27 @@ msgctxt "#37049"
 msgid "Remove dangling thumbnails."
 msgstr ""
 
+#: system/settings/settings.xml
+msgctxt "#37050"
+msgid "Local server only"
+msgstr ""
 
-#empty strings from id 37050 to 38009
+#: system/settings/settings.xml
+msgctxt "#37051"
+msgid "All servers"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#37052"
+msgid "Limit Home Shelf to selected Plex servers"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#37053"
+msgid "Only selected Plex servers will be displayed in Home Shelf, recently added and in progress"
+msgstr ""
+
+#empty strings from id 37053 to 38009
 
 #: system/settings/rbp.xml
 msgctxt "#38010"

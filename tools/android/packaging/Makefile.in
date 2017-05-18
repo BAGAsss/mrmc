@@ -15,7 +15,7 @@ OBJS+= libshairplay.so
 OBJS+= librtmp.so
 
 PLATFORM_OBJS =
-EXCLUDED_ADDONS =
+EXCLUDED_ADDONS += $(PKG_EXCLUDED_ADDONS)
 
 XBMCROOT = $(shell cd $(CURDIR)/../../..; pwd)
 COPYDIRS = system addons media
@@ -80,10 +80,6 @@ xbmc/assets:
 	mkdir -p xbmc/assets
 
 symbols: libs
-ifeq (1,@USE_BREAKPAD@)
-	for f in xbmc/obj/local/$(ABI)/*.so; do sh ./make_symbols.sh $$f; done
-	tar -cjf spmc.symbols-$(ABI)-`$(XBMCROOT)/tools/darwin/packaging/gitrev-posix`.tar.bz2 symbols
-endif
 
 shared:
 	mkdir -p assets

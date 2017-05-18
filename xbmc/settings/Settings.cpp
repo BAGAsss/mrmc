@@ -87,6 +87,7 @@
 #include "view/ViewStateSettings.h"
 #include "input/InputManager.h"
 #include "services/lighteffects/LightEffectServices.h"
+#include "services/emby/EmbyServices.h"
 #include "services/plex/PlexServices.h"
 
 #define SETTINGS_XML_FOLDER "special://xbmc/system/settings/"
@@ -107,6 +108,7 @@ const std::string CSettings::SETTING_LOOKANDFEEL_RSSHOST = "lookandfeel.rsshost"
 const std::string CSettings::SETTING_LOOKANDFEEL_RSSINTERVAL = "lookandfeel.rssinterval";
 const std::string CSettings::SETTING_LOOKANDFEEL_RSSRTL = "lookandfeel.rssrtl";
 const std::string CSettings::SETTING_LOOKANDFEEL_STEREOSTRENGTH = "lookandfeel.stereostrength";
+const std::string CSettings::SETTING_LOOKANDFEEL_NEWSKINCHECKED = "lookandfeel.newskinchecked";
 const std::string CSettings::SETTING_LOCALE_LANGUAGE = "locale.language";
 const std::string CSettings::SETTING_LOCALE_COUNTRY = "locale.country";
 const std::string CSettings::SETTING_LOCALE_CHARSET = "locale.charset";
@@ -136,7 +138,7 @@ const std::string CSettings::SETTING_WINDOW_TOP  = "window.top";
 const std::string CSettings::SETTING_WINDOW_WIDTH = "window.width";
 const std::string CSettings::SETTING_WINDOW_HEIGHT = "window.height";
 const std::string CSettings::SETTING_VIDEOLIBRARY_SHOWUNWATCHEDPLOTS = "videolibrary.showunwatchedplots";
-const std::string CSettings::SETTING_VIDEOLIBRARY_SHOWINPROGRESS = "videolibrary.showinprogress";
+const std::string CSettings::SETTING_VIDEOLIBRARY_HOMESHELFITEMS = "videolibrary.homeshelfitems";
 const std::string CSettings::SETTING_VIDEOLIBRARY_ACTORTHUMBS = "videolibrary.actorthumbs";
 const std::string CSettings::SETTING_MYVIDEOS_FLATTEN = "myvideos.flatten";
 const std::string CSettings::SETTING_VIDEOLIBRARY_FLATTENTVSHOWS = "videolibrary.flattentvshows";
@@ -171,7 +173,9 @@ const std::string CSettings::SETTING_VIDEOPLAYER_QUITSTEREOMODEONSTOP = "videopl
 const std::string CSettings::SETTING_VIDEOPLAYER_RENDERMETHOD = "videoplayer.rendermethod";
 const std::string CSettings::SETTING_VIDEOPLAYER_HQSCALERS = "videoplayer.hqscalers";
 const std::string CSettings::SETTING_VIDEOPLAYER_USEMEDIACODEC = "videoplayer.usemediacodec";
+const std::string CSettings::SETTING_VIDEOPLAYER_USEMEDIACODEC_INTERLACED = "videoplayer.mediacodec_interlaced";
 const std::string CSettings::SETTING_VIDEOPLAYER_USEMEDIACODECSURFACE = "videoplayer.usemediacodecsurface";
+const std::string CSettings::SETTING_VIDEOPLAYER_USEMEDIACODECSURFACE_INTERLACED = "videoplayer.mediacodecsurface_interlaced";
 const std::string CSettings::SETTING_VIDEOPLAYER_USEVDPAU = "videoplayer.usevdpau";
 const std::string CSettings::SETTING_VIDEOPLAYER_USEVDPAUMIXER = "videoplayer.usevdpaumixer";
 const std::string CSettings::SETTING_VIDEOPLAYER_USEVDPAUMPEG2 = "videoplayer.usevdpaumpeg2";
@@ -271,6 +275,7 @@ const std::string CSettings::SETTING_PVRPARENTAL_ENABLED = "pvrparental.enabled"
 const std::string CSettings::SETTING_PVRPARENTAL_PIN = "pvrparental.pin";
 const std::string CSettings::SETTING_PVRPARENTAL_DURATION = "pvrparental.duration";
 const std::string CSettings::SETTING_PVRCLIENT_MENUHOOK = "pvrclient.menuhook";
+const std::string CSettings::SETTING_PVRCLIENT_BROWSER = "pvrclient.broswer";
 const std::string CSettings::SETTING_PVRTIMERS_TIMERTYPEFILTER = "pvrtimers.timertypefilter";
 const std::string CSettings::SETTING_MUSICLIBRARY_SHOWCOMPILATIONARTISTS = "musiclibrary.showcompilationartists";
 const std::string CSettings::SETTING_MUSICLIBRARY_DOWNLOADINFO = "musiclibrary.downloadinfo";
@@ -372,6 +377,7 @@ const std::string CSettings::SETTING_AUDIOOUTPUT_NORMALIZELEVELS = "audiooutput.
 const std::string CSettings::SETTING_AUDIOOUTPUT_PROCESSQUALITY = "audiooutput.processquality";
 const std::string CSettings::SETTING_AUDIOOUTPUT_ATEMPOTHRESHOLD = "audiooutput.atempothreshold";
 const std::string CSettings::SETTING_AUDIOOUTPUT_STREAMSILENCE = "audiooutput.streamsilence";
+const std::string CSettings::SETTING_AUDIOOUTPUT_STREAMSILENCENOISEINDEX = "audiooutput.streamsilencenoiseindex";
 const std::string CSettings::SETTING_AUDIOOUTPUT_DSPADDONSENABLED = "audiooutput.dspaddonsenabled";
 const std::string CSettings::SETTING_AUDIOOUTPUT_DSPSETTINGS = "audiooutput.dspsettings";
 const std::string CSettings::SETTING_AUDIOOUTPUT_DSPRESETDB = "audiooutput.dspresetdb";
@@ -448,6 +454,7 @@ const std::string CSettings::SETTING_MYSQL_HOST = "mysql.host";
 const std::string CSettings::SETTING_MYSQL_PORT = "mysql.port";
 const std::string CSettings::SETTING_MYSQL_USER = "mysql.user";
 const std::string CSettings::SETTING_MYSQL_PASS = "mysql.pass";
+const std::string CSettings::SETTING_MYSQL_TIMEOUT = "mysql.timeout";
 const std::string CSettings::SETTING_MYSQL_VIDEO = "mysql.video";
 const std::string CSettings::SETTING_MYSQL_MUSIC = "mysql.music";
 const std::string CSettings::SETTING_THUMBNAILS_CLEANUP = "thumbnails.cleanup";
@@ -480,6 +487,17 @@ const std::string CSettings::SETTING_SERVICES_PLEXTRANSCODELOCAL = "plex.transco
 const std::string CSettings::SETTING_SERVICES_PLEXTRANSCODEAUDIO = "plex.transcodeaudio";
 const std::string CSettings::SETTING_SERVICES_PLEXTRANSCODELOCALEXCLUSION = "plex.transcodelocalexclusions";
 const std::string CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH = "plex.myplexauthtoken";
+const std::string CSettings::SETTING_SERVICES_PLEXLIMITHOMETO  = "plex.limithometo";
+
+// emby services
+const std::string CSettings::SETTING_SERVICES_EMBYSIGNIN = "emby.signin";
+const std::string CSettings::SETTING_SERVICES_EMBYSIGNINPIN = "emby.signinpin";
+const std::string CSettings::SETTING_SERVICES_EMBYSERVERSOURCES = "emby.serversources";
+const std::string CSettings::SETTING_SERVICES_EMBYUSERID = "emby.userid";
+const std::string CSettings::SETTING_SERVICES_EMBYSERVERURL = "emby.serverurl";
+const std::string CSettings::SETTING_SERVICES_EMBYSAVEDSOURCES = "emby.savedsources";
+const std::string CSettings::SETTING_SERVICES_EMBYACESSTOKEN = "emby.accesstoken";
+const std::string CSettings::SETTING_SERVICES_EMBYLIMITHOMETO  = "emby.limithometo";
 
 CSettings::CSettings()
   : m_initialized(false)
@@ -1171,6 +1189,7 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert(CSettings::SETTING_AUDIOOUTPUT_AUDIODEVICE);
   settingSet.insert(CSettings::SETTING_AUDIOOUTPUT_PASSTHROUGHDEVICE);
   settingSet.insert(CSettings::SETTING_AUDIOOUTPUT_STREAMSILENCE);
+  settingSet.insert(CSettings::SETTING_AUDIOOUTPUT_STREAMSILENCENOISEINDEX);
   settingSet.insert(CSettings::SETTING_AUDIOOUTPUT_MAINTAINORIGINALVOLUME);
   settingSet.insert(CSettings::SETTING_AUDIOOUTPUT_NORMALIZELEVELS);
   settingSet.insert(CSettings::SETTING_AUDIOOUTPUT_DSPADDONSENABLED);
@@ -1192,7 +1211,9 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert(CSettings::SETTING_VIDEOSCREEN_GUICALIBRATION);
   settingSet.insert(CSettings::SETTING_VIDEOSCREEN_TESTPATTERN);
   settingSet.insert(CSettings::SETTING_VIDEOPLAYER_USEMEDIACODEC);
+  settingSet.insert(CSettings::SETTING_VIDEOPLAYER_USEMEDIACODEC_INTERLACED);
   settingSet.insert(CSettings::SETTING_VIDEOPLAYER_USEMEDIACODECSURFACE);
+  settingSet.insert(CSettings::SETTING_VIDEOPLAYER_USEMEDIACODECSURFACE_INTERLACED);
   m_settingsManager->RegisterCallback(&g_application, settingSet);
 
   settingSet.clear();
@@ -1263,6 +1284,7 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert(CSettings::SETTING_PVRMANAGER_CHANNELSCAN);
   settingSet.insert(CSettings::SETTING_PVRMANAGER_RESETDB);
   settingSet.insert(CSettings::SETTING_PVRCLIENT_MENUHOOK);
+  settingSet.insert(CSettings::SETTING_PVRCLIENT_BROWSER);
   settingSet.insert(CSettings::SETTING_PVRMENU_SEARCHICONS);
   settingSet.insert(CSettings::SETTING_EPG_RESETEPG);
   settingSet.insert(CSettings::SETTING_PVRPARENTAL_ENABLED);
@@ -1345,6 +1367,16 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXUPDATEMINS);
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH);
   m_settingsManager->RegisterCallback(&CPlexServices::GetInstance(), settingSet);
+
+  settingSet.clear();
+  settingSet.insert(CSettings::SETTING_SERVICES_EMBYSIGNIN);
+  settingSet.insert(CSettings::SETTING_SERVICES_EMBYSIGNINPIN);
+  settingSet.insert(CSettings::SETTING_SERVICES_EMBYSERVERSOURCES);
+  settingSet.insert(CSettings::SETTING_SERVICES_EMBYUSERID);
+  settingSet.insert(CSettings::SETTING_SERVICES_EMBYSERVERURL);
+  settingSet.insert(CSettings::SETTING_SERVICES_EMBYACESSTOKEN);
+  settingSet.insert(CSettings::SETTING_SERVICES_EMBYSAVEDSOURCES);
+  m_settingsManager->RegisterCallback(&CEmbyServices::GetInstance(), settingSet);
 }
 
 bool CSettings::Reset()

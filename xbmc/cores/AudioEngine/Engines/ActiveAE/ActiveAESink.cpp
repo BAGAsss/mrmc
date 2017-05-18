@@ -46,6 +46,7 @@ CActiveAESink::CActiveAESink(CEvent *inMsgEvent) :
   m_stats = nullptr;
   m_volume = 0.0;
   m_packer = nullptr;
+  m_silenceNoiseFactorIndex = 0;
 }
 
 void CActiveAESink::Start()
@@ -846,7 +847,10 @@ void CActiveAESink::OpenSink()
   m_sampleOfSilence.pkt = new CSoundPacket(config, m_sinkFormat.m_frames);
   m_sampleOfSilence.pkt->nb_samples = m_sampleOfSilence.pkt->max_nb_samples;
   if (!passthrough)
+  {
+    m_silenceNoiseFactorIndex = CSettings::GetInstance().GetInt(CSettings::SETTING_AUDIOOUTPUT_STREAMSILENCENOISEINDEX);
     GenerateNoise();
+  }
   else
   {
     m_sampleOfSilence.pkt->nb_samples = 0;
@@ -917,8 +921,9 @@ unsigned int CActiveAESink::OutputSamples(CSampleBuffer* samples)
       }
       else if (samples->pkt->pause_burst_ms > 0)
       {
-        // construct a pause burst
-        m_packer->PackPause(m_sinkFormat.m_streamInfo, samples->pkt->pause_burst_ms);
+        // construct a pause burst if we have already output valid audio
+        bool burst = m_extStreaming && (m_packer->GetBuffer()[0] != 0);
+        m_packer->PackPause(m_sinkFormat.m_streamInfo, samples->pkt->pause_burst_ms, burst);
       }
       else
         m_packer->Reset();
@@ -1041,6 +1046,14 @@ void CActiveAESink::GenerateNoise()
   int nb_floats = m_sampleOfSilence.pkt->max_nb_samples;
   nb_floats *= m_sampleOfSilence.pkt->config.channels;
 
+  float noiseFactor = 0.00001f;
+  if (m_silenceNoiseFactorIndex >= 0 && m_silenceNoiseFactorIndex <= 3)
+  {
+    float noiseFactors[] = {0.00001f, 0.000005f, 0.000001f, 0.0000001f};
+    noiseFactor = noiseFactors[m_silenceNoiseFactorIndex];
+  }
+  CLog::Log(LOGDEBUG, "CActiveAESink::GenerateNoise - noiseFactor = %f", noiseFactor);
+
   float *noise = (float*)_aligned_malloc(nb_floats*sizeof(float), 16);
   if (!noise)
     throw std::bad_alloc();
@@ -1055,7 +1068,7 @@ void CActiveAESink::GenerateNoise()
     }
     while(R1 == 0.0f);
     
-    noise[i] = (float) sqrt( -2.0f * log( R1 )) * cos( 2.0f * PI * R2 ) * 0.00001f;
+    noise[i] = (float) sqrt( -2.0f * log( R1 )) * cos( 2.0f * PI * R2 ) * noiseFactor;
   }
 
   SampleConfig config = m_sampleOfSilence.pkt->config;

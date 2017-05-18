@@ -105,7 +105,7 @@ CPlexServices::CPlexServices()
 : CThread("PlexServices")
 , m_gdmListener(nullptr)
 , m_updateMins(0)
-, m_playState(PlexServicePlayerState::stopped)
+, m_playState(MediaServicesPlayerState::stopped)
 , m_hasClients(false)
 {
   // register our redacted protocol options with CURL
@@ -116,7 +116,7 @@ CPlexServices::CPlexServices()
   CAnnouncementManager::GetInstance().AddAnnouncer(this);
 
   m_plextv.SetTimeout(10);
-  m_plextv.SetBufferSize(32768*10);
+  //m_plextv.SetBufferSize(32768*10);
 }
 
 CPlexServices::~CPlexServices()
@@ -160,7 +160,7 @@ void CPlexServices::Stop()
   m_clients.clear();
   m_gdmListener = nullptr;
   m_updateMins = 0;
-  m_playState = PlexServicePlayerState::stopped;
+  m_playState = MediaServicesPlayerState::stopped;
   m_hasClients = false;
 }
 
@@ -328,13 +328,13 @@ void CPlexServices::Announce(AnnouncementFlag flag, const char *sender, const ch
     switch(mkhash(message))
     {
       case "OnPlay"_mkhash:
-        m_playState = PlexServicePlayerState::playing;
+        m_playState = MediaServicesPlayerState::playing;
         break;
       case "OnPause"_mkhash:
-        m_playState = PlexServicePlayerState::paused;
+        m_playState = MediaServicesPlayerState::paused;
         break;
       case "OnStop"_mkhash:
-        m_playState = PlexServicePlayerState::stopped;
+        m_playState = MediaServicesPlayerState::stopped;
         break;
       default:
         break;
@@ -390,7 +390,7 @@ void CPlexServices::OnSettingChanged(const CSetting *setting)
         // switch to no caching
         g_directoryCache.Clear();
       }
-      if (m_playState == PlexServicePlayerState::stopped)
+      if (m_playState == MediaServicesPlayerState::stopped)
       {
         CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
         g_windowManager.SendThreadMessage(msg);
@@ -428,7 +428,7 @@ void CPlexServices::UpdateLibraries(bool forced)
   if (clearDirCache)
   {
     g_directoryCache.Clear();
-    if (m_playState == PlexServicePlayerState::stopped)
+    if (m_playState == MediaServicesPlayerState::stopped)
     {
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
       g_windowManager.SendThreadMessage(msg);
@@ -499,13 +499,12 @@ void CPlexServices::Process()
       // try plex.tv
       if (MyPlexSignedIn())
       {
-        if (m_playState == PlexServicePlayerState::stopped)
+        if (m_playState == MediaServicesPlayerState::stopped)
         {
           // if we get back servers, then
           // reduce the initial polling time
           bool foundSomething = false;
           foundSomething = GetMyPlexServers(true);
-          //foundSomething = foundSomething || GetMyPlexServers(false);
           if (foundSomething)
             plextvTimeoutSeconds = 60 * 15;
         }
@@ -515,14 +514,14 @@ void CPlexServices::Process()
 
     if (gdmTimer.GetElapsedSeconds() > 5)
     {
-      if (m_playState == PlexServicePlayerState::stopped)
+      if (m_playState == MediaServicesPlayerState::stopped)
         CheckForGDMServers();
       gdmTimer.Reset();
     }
 
     if (m_updateMins > 0 && (checkUpdatesTimer.GetElapsedSeconds() > (60 * m_updateMins)))
     {
-      if (m_playState == PlexServicePlayerState::stopped)
+      if (m_playState == MediaServicesPlayerState::stopped)
         UpdateLibraries(false);
       checkUpdatesTimer.Reset();
     }
@@ -555,14 +554,15 @@ bool CPlexServices::GetPlexToken(std::string user, std::string pass)
   url.SetUserName(user);
   url.SetPassword(pass);
 
-  std::string strResponse;
+  std::string response;
   std::string strPostData;
-  if (plex.Post(url.Get(), strPostData, strResponse))
+  if (plex.Post(url.Get(), strPostData, response))
   {
     //CLog::Log(LOGDEBUG, "CPlexServices: myPlex %s", strResponse.c_str());
 
     CVariant reply;
-    reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
+    if (!CJSONVariantParser::Parse(response, reply))
+      return rtn;
 
     CVariant user = reply["user"];
     m_authToken = user["authentication_token"].asString();
@@ -577,7 +577,7 @@ bool CPlexServices::GetPlexToken(std::string user, std::string pass)
   {
     std::string strMessage = "Could not connect to retreive PlexToken";
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, "Plex Services", strMessage, 3000, true);
-    CLog::Log(LOGERROR, "CPlexServices:FetchPlexToken failed %s", strResponse.c_str());
+    CLog::Log(LOGERROR, "CPlexServices:FetchPlexToken failed %s", response.c_str());
   }
 
   return rtn;
@@ -587,7 +587,7 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
 {
   bool rtn = false;
 
-  std::vector<CPlexClientPtr> clientsFound;
+  std::vector<PlexServerInfo> serversFound;
 
   if (MyPlexSignedIn())
     m_plextv.SetRequestHeader("X-Plex-Token", m_authToken);
@@ -616,13 +616,8 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
         std::string provides = XMLUtils::GetAttribute(DeviceNode, "provides");
         if (provides == "server")
         {
-          CPlexClientPtr client(new CPlexClient());
-          if (client->Init(DeviceNode))
-          {
-            clientsFound.push_back(client);
-            // always return true if we find anything
-            rtn = true;
-          }
+          PlexServerInfo plexServerInfo = ParsePlexDeviceNode(DeviceNode);
+          serversFound.push_back(plexServerInfo);
         }
         DeviceNode = DeviceNode->NextSiblingElement("Device");
       }
@@ -637,25 +632,31 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
   }
 
   std::vector<CPlexClientPtr> lostClients;
-  if (!clientsFound.empty())
+  if (!serversFound.empty())
   {
-    for (const auto &client : clientsFound)
+    for (const auto &server : serversFound)
     {
-      if (AddClient(client))
+      // ignore clients we know about.
+      if (GetClient(server.uuid))
+        continue;
+
+      // new client that we do not know about, create and add it.
+      CPlexClientPtr client(new CPlexClient());
+      if (client->Init(server))
       {
-        // new client
-        CLog::Log(LOGNOTICE, "CPlexServices: Server found via plex.tv %s", client->GetServerName().c_str());
-      }
-      else if (GetClient(client->GetUuid()) == nullptr)
-      {
-        // lost client
-        lostClients.push_back(client);
-        CLog::Log(LOGNOTICE, "CPlexServices: Server was lost %s", client->GetServerName().c_str());
-      }
-      else if (UpdateClient(client))
-      {
-        // client exists and something changed
-        CLog::Log(LOGNOTICE, "CPlexServices: Server presence changed %s", client->GetServerName().c_str());
+        // always return true if we find anything
+        rtn = true;
+        if (AddClient(client))
+        {
+          // new client
+          CLog::Log(LOGNOTICE, "CPlexServices: Server found via plex.tv %s", client->GetServerName().c_str());
+        }
+        else if (GetClient(client->GetUuid()) == nullptr)
+        {
+          // lost client
+          lostClients.push_back(client);
+          CLog::Log(LOGNOTICE, "CPlexServices: Server was lost %s", client->GetServerName().c_str());
+        }
       }
     }
     AddJob(new CPlexServiceJob(0, "FoundNewClient"));
@@ -915,11 +916,6 @@ void CPlexServices::CheckForGDMServers()
               // lost client
               CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers Server was lost %s", client->GetServerName().c_str());
             }
-            else if (UpdateClient(client))
-            {
-              // client exists and something changed
-              CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers presence changed %s", client->GetServerName().c_str());
-            }
           }
         }
       }
@@ -951,6 +947,37 @@ bool CPlexServices::ClientIsLocal(std::string path)
   }
   
   return false;
+}
+
+PlexServerInfo CPlexServices::ParsePlexDeviceNode(const TiXmlElement* DeviceNode)
+{
+  PlexServerInfo serverInfo;
+
+  serverInfo.uuid = XMLUtils::GetAttribute(DeviceNode, "clientIdentifier");
+  serverInfo.owned = XMLUtils::GetAttribute(DeviceNode, "owned");
+  serverInfo.presence = XMLUtils::GetAttribute(DeviceNode, "presence");
+  serverInfo.platform = XMLUtils::GetAttribute(DeviceNode, "platform");
+  serverInfo.serverName = XMLUtils::GetAttribute(DeviceNode, "name");
+  serverInfo.accessToken = XMLUtils::GetAttribute(DeviceNode, "accessToken");
+  serverInfo.httpsRequired = XMLUtils::GetAttribute(DeviceNode, "httpsRequired");
+
+  const TiXmlElement* ConnectionNode = DeviceNode->FirstChildElement("Connection");
+  while (ConnectionNode)
+  {
+    PlexConnection connection;
+    connection.port = XMLUtils::GetAttribute(ConnectionNode, "port");
+    connection.address = XMLUtils::GetAttribute(ConnectionNode, "address");
+    connection.protocol = XMLUtils::GetAttribute(ConnectionNode, "protocol");
+    connection.external = XMLUtils::GetAttribute(ConnectionNode, "local") == "0" ? 1 : 0;
+    serverInfo.connections.push_back(connection);
+
+    ConnectionNode = ConnectionNode->NextSiblingElement("Connection");
+  }
+  // sort so that all external=0 are first. These are the local connections.
+  std::sort(serverInfo.connections.begin(), serverInfo.connections.end(),
+    [] (PlexConnection const& a, PlexConnection const& b) { return a.external < b.external; });
+
+  return serverInfo;
 }
 
 bool CPlexServices::AddClient(CPlexClientPtr foundClient)
@@ -996,38 +1023,6 @@ bool CPlexServices::RemoveClient(CPlexClientPtr lostClient)
   return false;
 }
 
-bool CPlexServices::UpdateClient(CPlexClientPtr updateClient)
-{
-  CSingleLock lock(m_criticalClients);
-  for (const auto &client : m_clients)
-  {
-    if (client->GetUuid() == updateClient->GetUuid())
-    {
-      // client needs updating
-      if (client->GetPresence() != updateClient->GetPresence())
-      {
-        client->SetPresence(updateClient->GetPresence());
-        // update any gui lists here.
-        for (const auto &item : client->GetSectionItems())
-        {
-          std::string title = client->FindSectionTitle(item->GetPath());
-          if (!title.empty())
-          {
-            item->SetLabel(client->FormatContentTitle(title));
-            CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
-            g_windowManager.SendThreadMessage(msg);
-          }
-        }
-        return true;
-      }
-      // no need to look further but an update was not needed
-      return false;
-    }
-  }
-
-  return false;
-}
-
 bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
 {
   bool rtn = false;
@@ -1035,7 +1030,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
   std::string strMessage;
   XFILE::CCurlFile plex;
   plex.SetTimeout(10);
-  plex.SetBufferSize(32768*10);
+  //plex.SetBufferSize(32768*10);
   CPlexUtils::GetDefaultHeaders(plex);
   if (MyPlexSignedIn())
     plex.SetRequestHeader("X-Plex-Token", m_authToken);

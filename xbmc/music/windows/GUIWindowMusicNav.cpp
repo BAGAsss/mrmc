@@ -152,10 +152,17 @@ bool CGUIWindowMusicNav::OnMessage(CGUIMessage& message)
       }
       else if (iControl == CONTROL_UPDATE_LIBRARY)
       {
-        if (!g_application.IsMusicScanning())
-          g_application.StartMusicScan("");
+        if (m_vecItems->IsMediaServiceBased())
+        {
+          CServicesManager::GetInstance().UpdateMediaServicesLibraries(*m_vecItems);
+        }
         else
-          g_application.StopMusicScan();
+        {
+          if (!g_application.IsMusicScanning())
+            g_application.StartMusicScan("");
+          else
+            g_application.StopMusicScan();
+        }
         return true;
       }
     }
@@ -888,19 +895,19 @@ std::string CGUIWindowMusicNav::GetStartFolder(const std::string &dir)
   else if (lower == "artists")
   {
     if (CServicesManager::GetInstance().HasServices())
-      return "plex://music/" + lower + "/";
+      return "services://music/" + lower + "/";
     return "musicdb://artists/";
   }
   else if (lower == "albums")
   {
     if (CServicesManager::GetInstance().HasServices())
-      return "plex://music/" + lower + "/";
+      return "services://music/" + lower + "/";
     return "musicdb://albums/";
   }
   else if (lower == "root")
   {
     if (CServicesManager::GetInstance().HasServices())
-      return "plex://music/" + lower + "/";
+      return "services://music/" + lower + "/";
   }
   else if (lower == "singles")
     return "musicdb://singles/";

@@ -96,7 +96,6 @@ CGUIMediaWindow::CGUIMediaWindow(int id, const char *xmlFile)
   m_unfilteredItems = new CFileItemList;
   m_vecItems->SetPath("?");
   m_iLastControl = -1;
-  m_iSelectedItem = -1;
   m_canFilterAdvanced = false;
 
   m_guiState.reset(CGUIViewState::GetViewState(GetID(), *m_vecItems));
@@ -231,7 +230,6 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
   {
   case GUI_MSG_WINDOW_DEINIT:
     {
-      m_iSelectedItem = m_viewControl.GetSelectedItem();
       m_iLastControl = GetFocusedControlID();
       CGUIWindow::OnMessage(message);
 
@@ -381,7 +379,7 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
       }
       else if (message.GetParam1()==GUI_MSG_UPDATE_ITEM && message.GetItem())
       {
-        CFileItemPtr newItem = std::dynamic_pointer_cast<CFileItem>(message.GetItem());
+        CFileItemPtr newItem = std::static_pointer_cast<CFileItem>(message.GetItem());
         if (newItem && IsActive())
         {
           if (m_vecItems->UpdateItem(newItem.get()) && message.GetParam2() == 1)
@@ -630,7 +628,8 @@ void CGUIMediaWindow::FormatAndSort(CFileItemList &items)
     viewState->GetSortMethodLabelMasks(labelMasks);
     FormatItemLabels(items, labelMasks);
 
-    items.Sort(viewState->GetSortMethod().sortBy, viewState->GetSortOrder(), viewState->GetSortMethod().sortAttributes);
+    SortDescription sorted = viewState->GetSortMethod();
+    items.Sort(sorted.sortBy, sorted.sortOrder, sorted.sortAttributes);
   }
 }
 
@@ -683,11 +682,14 @@ bool CGUIMediaWindow::GetDirectory(const std::string &strDirectory, CFileItemLis
 
   if (m_guiState.get() && !m_guiState->HideParentDirItems() && !items.GetPath().empty())
   {
-    CFileItemPtr pItem(new CFileItem(".."));
-    pItem->SetPath(strParentPath);
-    pItem->m_bIsFolder = true;
-    pItem->m_bIsShareOrDrive = false;
-    items.AddFront(pItem, 0);
+    if (items.GetLabel() != "Services")
+    {
+      CFileItemPtr pItem(new CFileItem(".."));
+      pItem->SetPath(strParentPath);
+      pItem->m_bIsFolder = true;
+      pItem->m_bIsShareOrDrive = false;
+      items.AddFront(pItem, 0);
+    }
   }
 
   int iWindow = GetID();
@@ -728,21 +730,10 @@ bool CGUIMediaWindow::Update(const std::string &strDirectory, bool updateFilterP
   if (strDirectory == "?")
     return false;
 
-  // get selected item
-  int iItem = m_viewControl.GetSelectedItem();
-  std::string strSelectedItem;
-  if (iItem >= 0 && iItem < m_vecItems->Size())
-  {
-    CFileItemPtr pItem = m_vecItems->Get(iItem);
-    if (!pItem->IsParentFolder())
-    {
-      GetDirectoryHistoryString(pItem.get(), strSelectedItem);
-    }
-  }
-  
-  std::string strCurrentDirectory = m_vecItems->GetPath();
-  m_history.SetSelectedItem(strSelectedItem, strCurrentDirectory);
+  // stores the selected item in history
+  SaveSelectedItemInHistory();
 
+  std::string strCurrentDirectory = m_vecItems->GetPath();
   std::string directory = strDirectory;
   // check if the path contains a filter and temporarily remove it
   // so that the retrieved list of items is unfiltered
@@ -845,28 +836,8 @@ bool CGUIMediaWindow::Update(const std::string &strDirectory, bool updateFilterP
 
   UpdateButtons();
 
-  strSelectedItem = m_history.GetSelectedItem(m_vecItems->GetPath());
-
-  bool bSelectedFound = false;
-  //int iSongInDirectory = -1;
-  for (int i = 0; i < m_vecItems->Size(); ++i)
-  {
-    CFileItemPtr pItem = m_vecItems->Get(i);
-
-    // Update selected item
-    std::string strHistory;
-    GetDirectoryHistoryString(pItem.get(), strHistory);
-    if (strHistory == strSelectedItem)
-    {
-      m_viewControl.SetSelectedItem(i);
-      bSelectedFound = true;
-      break;
-    }
-  }
-
-  // if we haven't found the selected item, select the first item
-  if (!bSelectedFound)
-    m_viewControl.SetSelectedItem(0);
+  // Restore selected item from history
+  RestoreSelectedItemFromHistory();
 
   m_history.AddPath(m_vecItems->GetPath(), m_strFilterPath);
 
@@ -1021,7 +992,7 @@ bool CGUIMediaWindow::OnClick(int iItem)
 #endif
   else
   {
-    m_iSelectedItem = m_viewControl.GetSelectedItem();
+    SaveSelectedItemInHistory();
 
     if (pItem->GetPath() == "newplaylist://")
     {
@@ -1176,6 +1147,44 @@ void CGUIMediaWindow::GoParentFolder()
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, g_localizeStrings.Get(2080), g_localizeStrings.Get(2081));
     GoParentFolder();
   }
+}
+
+void CGUIMediaWindow::SaveSelectedItemInHistory()
+{
+  int iItem = m_viewControl.GetSelectedItem();
+  std::string strSelectedItem;
+  if (iItem >= 0 && iItem < m_vecItems->Size())
+  {
+    CFileItemPtr pItem = m_vecItems->Get(iItem);
+    if (!pItem->IsParentFolder())
+      GetDirectoryHistoryString(pItem.get(), strSelectedItem);
+  }
+
+  m_history.SetSelectedItem(strSelectedItem, m_vecItems->GetPath());
+}
+
+void CGUIMediaWindow::RestoreSelectedItemFromHistory()
+{
+  std::string strSelectedItem = m_history.GetSelectedItem(m_vecItems->GetPath());
+
+  if (!strSelectedItem.empty())
+  {
+    for (int i = 0; i < m_vecItems->Size(); ++i)
+    {
+      CFileItemPtr pItem = m_vecItems->Get(i);
+      std::string strHistory;
+      GetDirectoryHistoryString(pItem.get(), strHistory);
+      // set selected item if equals with history
+      if (strHistory == strSelectedItem)
+      {
+        m_viewControl.SetSelectedItem(i);
+        return;
+      }
+    }
+  }
+
+  // if we haven't found the selected item, select the first item
+  m_viewControl.SetSelectedItem(0);
 }
 
 // \brief Override the function to change the default behavior on how
@@ -1486,10 +1495,19 @@ void CGUIMediaWindow::OnInitWindow()
 
   m_rootDir.SetAllowThreads(true);
 
-  if (m_iSelectedItem > -1)
-    m_viewControl.SetSelectedItem(m_iSelectedItem);
-
   CGUIWindow::OnInitWindow();
+}
+
+void CGUIMediaWindow::SaveControlStates()
+{
+  CGUIWindow::SaveControlStates();
+  SaveSelectedItemInHistory();
+}
+
+void CGUIMediaWindow::RestoreControlStates()
+{
+  CGUIWindow::RestoreControlStates();
+  RestoreSelectedItemFromHistory();
 }
 
 CGUIControl *CGUIMediaWindow::GetFirstFocusableControl(int id)
@@ -1744,17 +1762,6 @@ void CGUIMediaWindow::UpdateFilterPath(const std::string &strDirectory, const CF
 
 void CGUIMediaWindow::OnFilterItems(const std::string &filter)
 {
-  CFileItemPtr currentItem;
-  std::string currentItemPath;
-  int item = m_viewControl.GetSelectedItem();
-  if (item >= 0 && item < m_vecItems->Size())
-  {
-    currentItem = m_vecItems->Get(item);
-    currentItemPath = currentItem->GetPath();
-  }
-  
-  m_viewControl.Clear();
-  
   CFileItemList items;
   items.Copy(*m_vecItems, false); // use the original path - it'll likely be relied on for other things later.
   items.Append(*m_unfilteredItems);
@@ -1780,6 +1787,10 @@ void CGUIMediaWindow::OnFilterItems(const std::string &filter)
   
   GetGroupedItems(*m_vecItems);
   FormatAndSort(*m_vecItems);
+
+  // now we are in sync (m_vecItems) with those in m_viewControl
+  int item = m_viewControl.GetSelectedItem();
+  std::string currentItemPath = m_viewControl.GetSelectedItemPath();
 
   // get the "filter" option
   std::string filterOption;
@@ -1808,6 +1819,7 @@ void CGUIMediaWindow::OnFilterItems(const std::string &filter)
   SetProperty("filter", filter);
   if (filtered && m_canFilterAdvanced)
   {
+    CFileItemPtr currentItem = m_vecItems->Get(item);
     // to be able to select the same item as before we need to adjust
     // the path of the item i.e. add or remove the "filter=" URL option
     // but that's only necessary for folder items
@@ -1835,7 +1847,8 @@ void CGUIMediaWindow::OnFilterItems(const std::string &filter)
     m_vecItems->AddFront(pItem, 0);
   }
 
-  // and update our view control + buttons
+  // very last, update our view control + buttons
+  m_viewControl.Clear();
   m_viewControl.SetItems(*m_vecItems);
   m_viewControl.SetSelectedItem(currentItemPath);
   UpdateButtons();

@@ -26,7 +26,7 @@
 #include "URL.h"
 #include "filesystem/StackDirectory.h"
 #include "network/Network.h"
-#include "utils/Base64.h"
+#include "utils/Base64URL.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/SystemInfo.h"
@@ -47,7 +47,7 @@
 
 static int  g_progressSec = 0;
 static CFileItem m_curItem;
-static PlexUtilsPlayerState g_playbackState = PlexUtilsPlayerState::stopped;
+static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::stopped;
 
 bool CPlexUtils::HasClients()
 {
@@ -59,6 +59,7 @@ bool CPlexUtils::GetIdentity(CURL url, int timeout)
   // all (local and remote) plex server respond to identity
   XFILE::CCurlFile plex;
   plex.SetTimeout(timeout);
+  plex.SetSilent(true);
 
   url.SetFileName(url.GetFileName() + "identity");
   std::string strResponse;
@@ -112,28 +113,11 @@ void CPlexUtils::SetPlexItemProperties(CFileItem &item, const CPlexClientPtr &cl
   item.SetProperty("MediaServicesClientID", client->GetUuid());
 }
 
-void CPlexUtils::SetPlexItemsProperties(CFileItemList &items)
-{
-  CPlexClientPtr client = CPlexServices::GetInstance().FindClient(items.GetPath());
-  SetPlexItemsProperties(items, client);
-}
-
-void CPlexUtils::SetPlexItemsProperties(CFileItemList &items, const CPlexClientPtr &client)
-{
-  items.SetProperty("PlexItem", true);
-  items.SetProperty("MediaServicesItem", true);
-  if (!client)
-    return;
-  if (client->IsCloud())
-    items.SetProperty("MediaServicesCloudItem", true);
-  items.SetProperty("MediaServicesClientID", client->GetUuid());
-}
-
 TiXmlDocument CPlexUtils::GetPlexXML(std::string url, std::string filter)
 {
   std::string strXML;
   XFILE::CCurlFile http;
-  http.SetBufferSize(32768*10);
+  //http.SetBufferSize(32768*10);
   http.SetRequestHeader("Accept-Encoding", "gzip");
   GetDefaultHeaders(http);
 
@@ -384,7 +368,7 @@ void CPlexUtils::GetMediaDetals(CFileItem &item, CURL url, const TiXmlElement* m
       if (!key.empty() && (key[0] == '/'))
         StringUtils::TrimLeft(key, "/");
       url.SetFileName(key);
-      item.GetVideoInfoTag()->m_strServiceFile = XMLUtils::GetAttribute(partNode, "file");
+      item.SetMediaServiceFile(XMLUtils::GetAttribute(partNode, "file"));
       std::string propertyKey = StringUtils::Format("stack:%i_time", part);
       item.SetProperty(propertyKey, atoi(XMLUtils::GetAttribute(partNode, "duration").c_str())/1000 );
       if(part > 1)
@@ -406,14 +390,14 @@ void CPlexUtils::SetWatched(CFileItem &item)
   if (item.IsAudio())
     return;
 
-  std::string id = item.GetVideoInfoTag()->m_strServiceId;
+  std::string id = item.GetMediaServiceId();
   std::string url = item.GetPath();
   if (URIUtils::IsStack(url))
     url = XFILE::CStackDirectory::GetFirstStackedFile(url);
   else
     url   = URIUtils::GetParentPath(url);
   if (StringUtils::StartsWithNoCase(url, "plex://"))
-      url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+      url = Base64URL::Decode(URIUtils::GetFileName(item.GetPath()));
 
   std::string filename = StringUtils::Format(":/scrobble?identifier=com.plexapp.plugins.library&key=%s", id.c_str());
   ReportToServer(url, filename);
@@ -425,14 +409,14 @@ void CPlexUtils::SetUnWatched(CFileItem &item)
   if (item.IsAudio())
     return;
 
-  std::string id = item.GetVideoInfoTag()->m_strServiceId;
+  std::string id = item.GetMediaServiceId();
   std::string url = item.GetPath();
   if (URIUtils::IsStack(url))
     url = XFILE::CStackDirectory::GetFirstStackedFile(url);
   else
     url   = URIUtils::GetParentPath(url);
   if (StringUtils::StartsWithNoCase(url, "plex://"))
-    url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+    url = Base64URL::Decode(URIUtils::GetFileName(item.GetPath()));
 
   std::string filename = StringUtils::Format(":/unscrobble?identifier=com.plexapp.plugins.library&key=%s", id.c_str());
   ReportToServer(url, filename);
@@ -445,16 +429,16 @@ void CPlexUtils::ReportProgress(CFileItem &item, double currentSeconds)
     return;
   
   // we get called from Application.cpp every 500ms
-  if ((g_playbackState == PlexUtilsPlayerState::stopped || g_progressSec == 0 || g_progressSec > 120))
+  if ((g_playbackState == MediaServicesPlayerState::stopped || g_progressSec == 0 || g_progressSec > 120))
   {
     g_progressSec = 0;
 
     std::string status;
-    if (g_playbackState == PlexUtilsPlayerState::playing )
+    if (g_playbackState == MediaServicesPlayerState::playing )
       status = "playing";
-    else if (g_playbackState == PlexUtilsPlayerState::paused )
+    else if (g_playbackState == MediaServicesPlayerState::paused )
       status = "paused";
-    else if (g_playbackState == PlexUtilsPlayerState::stopped)
+    else if (g_playbackState == MediaServicesPlayerState::stopped)
       status = "stopped";
 
     if (!status.empty())
@@ -471,9 +455,9 @@ void CPlexUtils::ReportProgress(CFileItem &item, double currentSeconds)
         url = url3.Get();
       }
       if (StringUtils::StartsWithNoCase(url, "plex://"))
-        url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+        url = Base64URL::Decode(URIUtils::GetFileName(item.GetPath()));
 
-      std::string id    = item.GetVideoInfoTag()->m_strServiceId;
+      std::string id    = item.GetMediaServiceId();
       int totalSeconds  = item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
 
       std::string filename = StringUtils::Format(":/timeline?ratingKey=%s&",id.c_str());
@@ -488,7 +472,7 @@ void CPlexUtils::ReportProgress(CFileItem &item, double currentSeconds)
   g_progressSec++;
 }
 
-void CPlexUtils::SetPlayState(PlexUtilsPlayerState state)
+void CPlexUtils::SetPlayState(MediaServicesPlayerState state)
 {
   g_progressSec = 0;
   g_playbackState = state;
@@ -562,7 +546,7 @@ bool CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* roo
     std::string title = XMLUtils::GetAttribute(videoNode, "title");
     plexItem->SetLabel(title);
     plexItem->GetVideoInfoTag()->m_strTitle = title;
-    plexItem->GetVideoInfoTag()->m_strServiceId = XMLUtils::GetAttribute(videoNode, "ratingKey");
+    plexItem->SetMediaServiceId(XMLUtils::GetAttribute(videoNode, "ratingKey"));
     plexItem->SetProperty("PlexShowKey", XMLUtils::GetAttribute(rootXmlNode, "grandparentRatingKey"));
     plexItem->GetVideoInfoTag()->m_type = type;
     plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(videoNode, "tagline"));
@@ -585,8 +569,9 @@ bool CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* roo
     plexItem->GetVideoInfoTag()->SetRating(atof(XMLUtils::GetAttribute(videoNode, "rating").c_str()));
     plexItem->GetVideoInfoTag()->m_strMPAARating = XMLUtils::GetAttribute(videoNode, "contentRating");
 
-    // lastViewedAt means that it was watched, if so we set m_playCount to 1 and set overlay
-    if (((TiXmlElement*) videoNode)->Attribute("lastViewedAt"))
+    // lastViewedAt means that it was watched, if so we set m_playCount to 1 and set overlay.
+    // If we have "viewOffset" that means we are partially watched and shoudl not set m_playCount to 1
+    if (((TiXmlElement*) videoNode)->Attribute("lastViewedAt") && !((TiXmlElement*) videoNode)->Attribute("viewOffset"))
     {
       plexItem->GetVideoInfoTag()->m_playCount = 1;
     }
@@ -616,7 +601,7 @@ bool CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* roo
   // this is needed to display movies/episodes properly ... dont ask
   // good thing it didnt take 2 days to figure it out
   items.SetProperty("library.filter", "true");
-  SetPlexItemsProperties(items);
+  SetPlexItemProperties(items);
 
   return rtn;
 }
@@ -655,8 +640,8 @@ bool CPlexUtils::GetPlexTvshows(CFileItemList &items, std::string url)
       plexItem->SetLabel(XMLUtils::GetAttribute(directoryNode, "title"));
       CURL url1(url);
       url1.SetFileName("library/metadata/" + XMLUtils::GetAttribute(directoryNode, "ratingKey") + "/children");
-      plexItem->SetPath("plex://tvshows/shows/" + Base64::Encode(url1.Get()));
-      plexItem->GetVideoInfoTag()->m_strServiceId = XMLUtils::GetAttribute(directoryNode, "ratingKey");
+      plexItem->SetPath("plex://tvshows/shows/" + Base64URL::Encode(url1.Get()));
+      plexItem->SetMediaServiceId(XMLUtils::GetAttribute(directoryNode, "ratingKey"));
       plexItem->SetProperty("PlexShowKey", XMLUtils::GetAttribute(directoryNode, "ratingKey"));
       plexItem->GetVideoInfoTag()->m_type = MediaTypeTvShow;
       plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(directoryNode, "title");
@@ -738,9 +723,9 @@ bool CPlexUtils::GetPlexSeasons(CFileItemList &items, const std::string url)
         plexItem->SetLabel(XMLUtils::GetAttribute(directoryNode, "title"));
         CURL url1(url);
         url1.SetFileName("library/metadata/" + XMLUtils::GetAttribute(directoryNode, "ratingKey") + "/children");
-        plexItem->SetPath("plex://tvshows/seasons/" + Base64::Encode(url1.Get()));
-        plexItem->GetVideoInfoTag()->m_strServiceId = XMLUtils::GetAttribute(directoryNode, "ratingKey");
-        plexItem->GetVideoInfoTag()->m_type = MediaTypeTvShow;
+        plexItem->SetPath("plex://tvshows/seasons/" + Base64URL::Encode(url1.Get()));
+        plexItem->SetMediaServiceId(XMLUtils::GetAttribute(directoryNode, "ratingKey"));
+        plexItem->GetVideoInfoTag()->m_type = MediaTypeSeason;
         plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(directoryNode, "title");
         // we get these from rootXmlNode, where all show info is
         plexItem->GetVideoInfoTag()->m_strShowTitle = XMLUtils::GetAttribute(rootXmlNode, "parentTitle");
@@ -788,7 +773,7 @@ bool CPlexUtils::GetPlexSeasons(CFileItemList &items, const std::string url)
 
   items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
   items.SetProperty("library.filter", "true");
-  SetPlexItemsProperties(items);
+  SetPlexItemProperties(items);
 
   return rtn;
 }
@@ -818,7 +803,7 @@ bool CPlexUtils::GetPlexRecentlyAddedEpisodes(CFileItemList &items, const std::s
   CURL url2(url);
   std::string strXML;
   XFILE::CCurlFile http;
-  http.SetBufferSize(32768*10);
+  //http.SetBufferSize(32768*10);
   http.SetRequestHeader("Accept-Encoding", "gzip");
 
   url2.SetFileName(url2.GetFileName() + "recentlyAdded");
@@ -859,7 +844,7 @@ bool CPlexUtils::GetPlexInProgressShows(CFileItemList &items, const std::string 
   CURL url2(url);
   std::string strXML;
   XFILE::CCurlFile http;
-  http.SetBufferSize(32768*10);
+  //http.SetBufferSize(32768*10);
   http.SetRequestHeader("Accept-Encoding", "gzip");
   
   url2.SetFileName(url2.GetFileName() + "onDeck");
@@ -905,7 +890,7 @@ bool CPlexUtils::GetPlexRecentlyAddedMovies(CFileItemList &items, const std::str
 
   std::string strXML;
   XFILE::CCurlFile http;
-  http.SetBufferSize(32768*10);
+  //http.SetBufferSize(32768*10);
   http.SetRequestHeader("Accept-Encoding", "gzip");
 
   http.Get(url2.Get(), strXML);
@@ -941,7 +926,7 @@ bool CPlexUtils::GetPlexInProgressMovies(CFileItemList &items, const std::string
   CURL url2(url);
   std::string strXML;
   XFILE::CCurlFile http;
-  http.SetBufferSize(32768*10);
+  //http.SetBufferSize(32768*10);
   http.SetRequestHeader("Accept-Encoding", "gzip");
   
   url2.SetFileName(url2.GetFileName() + "onDeck");
@@ -982,11 +967,17 @@ bool CPlexUtils::GetAllPlexRecentlyAddedMoviesAndShows(CFileItemList &items, boo
   if (CPlexServices::GetInstance().HasClients())
   {
     CFileItemList plexItems;
+    int limitTo = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_PLEXLIMITHOMETO);
+    if (limitTo < 2)
+      return false;
     //look through all plex clients and pull recently added for each library section
     std::vector<CPlexClientPtr> clients;
     CPlexServices::GetInstance().GetClients(clients);
     for (const auto &client : clients)
     {
+      if (limitTo == 2 && !client->IsOwned())
+        continue;
+      
       std::vector<PlexSectionsContent> contents;
       if (tvShow)
         contents = client->GetTvContent();
@@ -1006,7 +997,7 @@ bool CPlexUtils::GetAllPlexRecentlyAddedMoviesAndShows(CFileItemList &items, boo
         for (int item = 0; item < plexItems.Size(); ++item)
           CPlexUtils::SetPlexItemProperties(*plexItems[item], client);
       }
-      SetPlexItemsProperties(plexItems);
+      SetPlexItemProperties(plexItems);
       items.Append(plexItems);
       plexItems.ClearItems();
     }
@@ -1021,11 +1012,17 @@ bool CPlexUtils::GetAllPlexInProgress(CFileItemList &items, bool tvShow)
   if (CPlexServices::GetInstance().HasClients())
   {
     CFileItemList plexItems;
+    int limitTo = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_PLEXLIMITHOMETO);
+    if (limitTo < 2)
+      return false;
     //look through all plex clients and pull recently added for each library section
     std::vector<CPlexClientPtr> clients;
     CPlexServices::GetInstance().GetClients(clients);
     for (const auto &client : clients)
     {
+      if (limitTo == 2 && !client->IsOwned())
+        continue;
+      
       std::vector<PlexSectionsContent> contents;
       if (tvShow)
         contents = client->GetTvContent();
@@ -1045,7 +1042,7 @@ bool CPlexUtils::GetAllPlexInProgress(CFileItemList &items, bool tvShow)
         for (int item = 0; item < plexItems.Size(); ++item)
           CPlexUtils::SetPlexItemProperties(*plexItems[item], client);
       }
-      SetPlexItemsProperties(plexItems);
+      SetPlexItemProperties(plexItems);
       items.Append(plexItems);
       plexItems.ClearItems();
     }
@@ -1075,7 +1072,7 @@ bool CPlexUtils::GetPlexFilter(CFileItemList &items, std::string url, std::strin
       pItem->m_bIsShareOrDrive = false;
       CURL plex(url);
       plex.SetFileName(plex.GetFileName() + "all?" + filter + "=" + key);
-      pItem->SetPath(parentPath + Base64::Encode(plex.Get()));
+      pItem->SetPath(parentPath + Base64URL::Encode(plex.Get()));
       pItem->SetLabel(title);
       pItem->SetProperty("SkipLocalArt", true);
       SetPlexItemProperties(*pItem);
@@ -1091,9 +1088,9 @@ bool CPlexUtils::GetItemSubtiles(CFileItem &item)
 {
   std::string url = URIUtils::GetParentPath(item.GetPath());
   if (StringUtils::StartsWithNoCase(url, "plex://"))
-    url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+    url = Base64URL::Decode(URIUtils::GetFileName(item.GetPath()));
   
-  std::string id = item.GetVideoInfoTag()->m_strServiceId;
+  std::string id = item.GetMediaServiceId();
   std::string filename = StringUtils::Format("library/metadata/%s", id.c_str());
   
   CURL url2(url);
@@ -1141,9 +1138,9 @@ bool CPlexUtils::GetMoreItemInfo(CFileItem &item)
 {
   std::string url = URIUtils::GetParentPath(item.GetPath());
   if (StringUtils::StartsWithNoCase(url, "plex://"))
-    url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+    url = Base64URL::Decode(URIUtils::GetFileName(item.GetPath()));
   
-  std::string id = item.GetVideoInfoTag()->m_strServiceId;
+  std::string id = item.GetMediaServiceId();
   std::string childElement = "Video";
   if (item.HasProperty("PlexShowKey") && item.GetVideoInfoTag()->m_type != MediaTypeMovie)
   {
@@ -1191,8 +1188,8 @@ bool CPlexUtils::GetMoreItemInfo(CFileItem &item)
 
 bool CPlexUtils::GetMoreResolutions(CFileItem &item)
 {
+  std::string id  = item.GetMediaServiceId();
   std::string url = item.GetVideoInfoTag()->m_strFileNameAndPath;
-  std::string id  = item.GetVideoInfoTag()->m_strServiceId;
   
   if (URIUtils::IsStack(url))
     url = XFILE::CStackDirectory::GetFirstStackedFile(url);
@@ -1308,7 +1305,7 @@ bool CPlexUtils::SearchPlex(CFileItemList &items, std::string strSearchString)
       for (int item = 0; item < plexItems.Size(); ++item)
         CPlexUtils::SetPlexItemProperties(*plexItems[item], client);
       
-      SetPlexItemsProperties(plexItems);
+      SetPlexItemProperties(plexItems);
       items.Append(plexItems);
       plexItems.ClearItems();
     }
@@ -1375,8 +1372,8 @@ bool CPlexUtils::GetPlexArtistsOrAlbum(CFileItemList &items, std::string url, bo
       plexItem->SetLabel(XMLUtils::GetAttribute(directoryNode, "title"));
       CURL url1(url);
       url1.SetFileName("library/metadata/" + XMLUtils::GetAttribute(directoryNode, "ratingKey") + "/children");
-      plexItem->SetPath(strMediaTypeUrl + Base64::Encode(url1.Get()));
-      plexItem->GetMusicInfoTag()->m_strServiceId = XMLUtils::GetAttribute(directoryNode, "ratingKey");
+      plexItem->SetPath(strMediaTypeUrl + Base64URL::Encode(url1.Get()));
+      plexItem->SetMediaServiceId(XMLUtils::GetAttribute(directoryNode, "ratingKey"));
       
       plexItem->GetMusicInfoTag()->m_type = strMediaType;
       plexItem->GetMusicInfoTag()->SetTitle(XMLUtils::GetAttribute(directoryNode, "title"));
@@ -1421,7 +1418,7 @@ bool CPlexUtils::GetPlexArtistsOrAlbum(CFileItemList &items, std::string url, bo
   }
   items.SetProperty("library.filter", "true");
   items.GetVideoInfoTag()->m_type = strMediaType;
-  SetPlexItemsProperties(items);
+  SetPlexItemProperties(items);
   
   return rtn;
 }
@@ -1537,7 +1534,7 @@ bool CPlexUtils::GetPlexSongs(CFileItemList &items, std::string url)
             StringUtils::TrimLeft(key, "/");
           url1.SetFileName(key);
           plexItem->SetPath(url1.Get());
-          plexItem->GetMusicInfoTag()->m_strServiceId = XMLUtils::GetAttribute(trackNode, "ratingKey");
+          plexItem->SetMediaServiceId(XMLUtils::GetAttribute(trackNode, "ratingKey"));
           plexItem->SetProperty("PlexSongKey", XMLUtils::GetAttribute(trackNode, "ratingKey"));
           plexItem->GetMusicInfoTag()->m_type = MediaTypeSong;
           plexItem->GetMusicInfoTag()->SetTitle(XMLUtils::GetAttribute(trackNode, "title"));
@@ -1576,7 +1573,7 @@ bool CPlexUtils::GetPlexSongs(CFileItemList &items, std::string url)
   }
   items.SetProperty("library.filter", "true");
   items.GetMusicInfoTag()->m_type = MediaTypeSong;
-  SetPlexItemsProperties(items);
+  SetPlexItemProperties(items);
   return rtn;
 }
 
@@ -1618,11 +1615,17 @@ bool CPlexUtils::GetPlexRecentlyAddedAlbums(CFileItemList &items, int limit)
   if (CPlexServices::GetInstance().HasClients())
   {
     CFileItemList plexItems;
+    int limitTo = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_PLEXLIMITHOMETO);
+    if (limitTo < 2)
+      return false;
     //look through all plex clients and pull recently added for each library section
     std::vector<CPlexClientPtr> clients;
     CPlexServices::GetInstance().GetClients(clients);
     for (const auto &client : clients)
     {
+      if (limitTo == 2 && !client->IsOwned())
+        continue;
+      
       std::vector<PlexSectionsContent> contents;
       contents = client->GetArtistContent();
       for (const auto &content : contents)
@@ -1638,7 +1641,7 @@ bool CPlexUtils::GetPlexRecentlyAddedAlbums(CFileItemList &items, int limit)
         for (int item = 0; item < plexItems.Size(); ++item)
           CPlexUtils::SetPlexItemProperties(*plexItems[item], client);
       }
-      SetPlexItemsProperties(plexItems);
+      SetPlexItemProperties(plexItems);
       items.Append(plexItems);
       items.SetLabel("Recently Added Albums");
       items.Sort(SortByDateAdded, SortOrderDescending);
@@ -1653,7 +1656,7 @@ bool CPlexUtils::GetPlexAlbumSongs(CFileItem item, CFileItemList &items)
 {
   std::string url = item.GetPath();
   if (StringUtils::StartsWithNoCase(url, "plex://"))
-    url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+    url = Base64URL::Decode(URIUtils::GetFileName(item.GetPath()));
   CURL url1(url);
   url1.SetFileName("library/metadata/" + item.GetProperty("PlexAlbumKey").asString() + "/children");
   url1.RemoveProtocolOption("X-Plex-Container-Start");
@@ -1662,8 +1665,9 @@ bool CPlexUtils::GetPlexAlbumSongs(CFileItem item, CFileItemList &items)
   
 }
 
-bool CPlexUtils::GetPlexMediaTotals(PlexMediaCount &totals)
+bool CPlexUtils::GetPlexMediaTotals(MediaServicesMediaCount &totals)
 {
+  // totals might or might not be reset to zero so add to it
   std::vector<CPlexClientPtr> clients;
   CPlexServices::GetInstance().GetClients(clients);
   for (const auto &client : clients)
@@ -1684,11 +1688,11 @@ bool CPlexUtils::GetPlexMediaTotals(PlexMediaCount &totals)
         curl.SetProtocolOption("X-Plex-Container-Size", "0");
         // get movie unwatched totals
         xml = GetPlexXML(curl.Get());
-        totals.iMovieUnwatched = totals.iMovieUnwatched + ParsePlexMediaXML(xml);
+        totals.iMovieUnwatched += ParsePlexMediaXML(xml);
         // get movie totals
         curl.SetFileName(content.section + "/all?type=1");
         xml = GetPlexXML(curl.Get());
-        totals.iMovieTotal = totals.iMovieTotal + ParsePlexMediaXML(xml);
+        totals.iMovieTotal +=ParsePlexMediaXML(xml);
       }
       // Show Totals
       contents = client->GetTvContent();
@@ -1702,19 +1706,19 @@ bool CPlexUtils::GetPlexMediaTotals(PlexMediaCount &totals)
         curl.SetProtocolOption("X-Plex-Container-Size", "0");
         // get episode unwatched totals
         xml = GetPlexXML(curl.Get());
-        totals.iEpisodeUnwatched = totals.iEpisodeUnwatched + ParsePlexMediaXML(xml);
+        totals.iEpisodeUnwatched += ParsePlexMediaXML(xml);
         // get episode totals
         curl.SetFileName(content.section + "/all?type=4");
         xml = GetPlexXML(curl.Get());
-        totals.iEpisodeTotal = totals.iEpisodeTotal + ParsePlexMediaXML(xml);
+        totals.iEpisodeTotal += ParsePlexMediaXML(xml);
         // get show totals
         curl.SetFileName(content.section + "/all?type=2");
         xml = GetPlexXML(curl.Get());
-        totals.iShowTotal = totals.iShowTotal + ParsePlexMediaXML(xml);
+        totals.iShowTotal += ParsePlexMediaXML(xml);
         // get show unwatched totals
         curl.SetFileName(content.section + "/all?type=2&unwatched=1");
         xml = GetPlexXML(curl.Get());
-        totals.iShowUnwatched = totals.iShowUnwatched + ParsePlexMediaXML(xml);
+        totals.iShowUnwatched += ParsePlexMediaXML(xml);
       }
       // Music Totals
       contents = client->GetArtistContent();
@@ -1728,15 +1732,15 @@ bool CPlexUtils::GetPlexMediaTotals(PlexMediaCount &totals)
         curl.SetProtocolOption("X-Plex-Container-Size", "0");
         // get artist totals
         xml = GetPlexXML(curl.Get());
-        totals.iMusicArtist = totals.iMusicArtist + ParsePlexMediaXML(xml);
+        totals.iMusicArtist += ParsePlexMediaXML(xml);
         // get Album totals
         curl.SetFileName(content.section + "/all?type=9");
         xml = GetPlexXML(curl.Get());
-        totals.iMusicAlbums = totals.iMusicAlbums + ParsePlexMediaXML(xml);
+        totals.iMusicAlbums += ParsePlexMediaXML(xml);
         // get Song totals
         curl.SetFileName(content.section + "/all?type=10");
         xml = GetPlexXML(curl.Get());
-        totals.iMusicSongs = totals.iMusicSongs + ParsePlexMediaXML(xml);
+        totals.iMusicSongs += ParsePlexMediaXML(xml);
       }
     }
   }
@@ -1824,7 +1828,7 @@ bool CPlexUtils::GetURL(CFileItem &item)
   
   CLog::Log(LOGDEBUG, "CPlexUtils::GetURL - bitrate [%s] res [%s]", maxBitrate.c_str(), resolution.c_str());
   
-  std::string plexID = item.GetVideoInfoTag()->m_strServiceId;
+  std::string plexID = item.GetMediaServiceId();
   std::string uuidStr = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID);
   
   curl.SetFileName("video/:/transcode/universal/start.m3u8");

@@ -280,8 +280,8 @@ void CDVDMediaCodecInfo::UpdateTexImage()
   // wait, then video playback gets jerky. To optomize this,
   // we hook the SurfaceTexture OnFrameAvailable callback
   // using CJNISurfaceTextureOnFrameAvailableListener and wait
-  // on a CEvent to fire. 50ms seems to be a good max fallback.
-  m_frameready->WaitMSec(50);
+  // on a CEvent to fire. 20ms seems to be a good max fallback.
+  m_frameready->WaitMSec(20);
 
   m_surfacetexture->updateTexImage();
   if (xbmc_jnienv()->ExceptionCheck())
@@ -327,7 +327,7 @@ void CDVDMediaCodecInfo::RenderUpdate(const CRect &SrcRect, const CRect &DestRec
 
 /*****************************************************************************/
 /*****************************************************************************/
-CDVDVideoCodecAndroidMediaCodec::CDVDVideoCodecAndroidMediaCodec(bool surface_render)
+CDVDVideoCodecAndroidMediaCodec::CDVDVideoCodecAndroidMediaCodec(bool surface_render, bool render_interlaced)
 : m_formatname("mediacodec")
 , m_opened(false)
 , m_surface(NULL)
@@ -335,6 +335,7 @@ CDVDVideoCodecAndroidMediaCodec::CDVDVideoCodecAndroidMediaCodec(bool surface_re
 , m_bitstream(NULL)
 , m_render_sw(false)
 , m_render_surface(surface_render)
+, m_render_interlaced(render_interlaced)
 {
   memset(&m_videobuffer, 0x00, sizeof(DVDVideoPicture));
 }
@@ -410,15 +411,10 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       {
         CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Open - possible interlaced h264, profile(%d), level(%d)",
           hints.profile, hints.level);
-        // we know firetv has issues with h264/interlaced
-        if (CAndroidFeatures::IsFireTVDevice())
-          return false;
-
-        // High@L4.1 interlaced works on shield,
-        // everything else fails.
-        if (hints.profile != FF_PROFILE_H264_HIGH || hints.level != 41)
+        if (!m_render_interlaced)
           return false;
       }
+
       switch(hints.profile)
       {
         case FF_PROFILE_H264_HIGH_10:
@@ -630,6 +626,18 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   m_videobuffer.color_range  = 0;
   m_videobuffer.color_matrix = 4;
   m_videobuffer.iFlags  = DVP_FLAG_ALLOCATED;
+  if (!m_render_surface && !CAndroidFeatures::IsShieldTVDevice())
+  {
+    // for FireOS, MediaCodec returns the interlaced frames as is,
+    // for Shield, MediaCodec will kick in an internal deinterlacer
+    // and return progressive frames.
+    if (hints.maybe_interlaced)
+    {
+      m_videobuffer.iFlags |= DVP_FLAG_INTERLACED;
+      // should be DVP_FLAG_TOP_FIELD_FIRST but android seems to be inverted ?
+      //m_videobuffer.iFlags |= DVP_FLAG_TOP_FIELD_FIRST;
+    }
+  }
   m_videobuffer.iWidth  = m_hints.width;
   m_videobuffer.iHeight = m_hints.height;
   // these will get reset to crop values later
@@ -1077,7 +1085,7 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
 {
   int rtn = 0;
 
-  int64_t timeout_us = 50000;
+  int64_t timeout_us = 5000;
   CJNIMediaCodecBufferInfo bufferInfo;
   int index = m_codec->dequeueOutputBuffer(bufferInfo, timeout_us);
   if (xbmc_jnienv()->ExceptionCheck())
@@ -1405,8 +1413,15 @@ void CDVDVideoCodecAndroidMediaCodec::ConfigureOutputFormat(CJNIMediaFormat* med
     }
   }
 
-  m_videobuffer.iWidth  = crop_right  + 1 - crop_left;
-  m_videobuffer.iHeight = crop_bottom + 1 - crop_top;
+  // Refering to the mediacodec API documentation the size of a frame is computed by:
+  // 1.) Retrieve mediaFormat wich / height
+  // 2.) Check if crop rect is given and overwrite values in 1.)
+  if (crop_right)
+    width = crop_right  + 1 - crop_left;
+  if (crop_bottom)
+    height = crop_bottom + 1 - crop_top;
+  m_videobuffer.iWidth  = width;
+  m_videobuffer.iHeight = height;
   m_videobuffer.iDisplayWidth  = width;
   m_videobuffer.iDisplayHeight = height;
 

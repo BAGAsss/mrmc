@@ -137,8 +137,8 @@
 #define GUI_MSG_INPUT_TEXT_EDIT       GUI_MSG_USER + 38
 
 // Sent to CGUIWindowEventLog
-#define GUI_MSG_EVENT_ADDED        GUI_MSG_USER + 39
-#define GUI_MSG_EVENT_REMOVED      GUI_MSG_USER + 40
+#define GUI_MSG_EVENT_ADDED           GUI_MSG_USER + 39
+#define GUI_MSG_EVENT_REMOVED         GUI_MSG_USER + 40
 
 // Send to RDS Radiotext handlers to inform about changed data
 #define GUI_MSG_UPDATE_RADIOTEXT      GUI_MSG_USER + 41

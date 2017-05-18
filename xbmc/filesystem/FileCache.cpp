@@ -35,7 +35,7 @@
 
 using namespace XFILE;
 
-#define READ_CACHE_CHUNK_SIZE (512*1024)
+#define READ_CACHE_CHUNK_SIZE (128*1024)
 
 class CWriteRate
 {
@@ -287,6 +287,7 @@ void CFileCache::Process()
       m_seekEnded.Set();
     }
 
+/*
     while (m_writeRate)
     {
       int readBufferFactor = CSettings::GetInstance().GetInt(CSettings::SETTING_NETWORK_READBUFFERFACTOR);
@@ -307,6 +308,7 @@ void CFileCache::Process()
         break;
       }
     }
+*/
 
     size_t maxWrite = m_pCache->GetMaxWriteSize(m_chunkSize);
 

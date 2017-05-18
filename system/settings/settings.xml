@@ -145,6 +145,12 @@
           <default>false</default>
           <control type="toggle" />
         </setting>
+        <setting id="lookandfeel.newskinchecked" type="boolean" label="" help="">
+          <level>0</level>
+          <default>false</default>
+          <visible>false</visible>
+          <control type="toggle" />
+        </setting>
       </group>
     </category>
     <category id="locale" label="14090" help="36113">
@@ -451,10 +457,17 @@
           <default>true</default>
           <control type="toggle" />
         </setting>
-        <setting id="videolibrary.showinprogress" type="boolean" label="703" help="704">
+        <setting id="videolibrary.homeshelfitems" type="integer" label="703" help="704">
           <level>0</level>
-          <default>false</default>
-          <control type="toggle" />
+          <default>1</default>
+          <constraints>
+            <options>
+              <option label="681">1</option> <!-- Recently added -->
+              <option label="682">2</option> <!-- In Progress -->
+              <option label="683">3</option> <!-- Both if possible -->
+            </options>
+          </constraints>
+          <control type="list" format="integer" />
         </setting>
         <setting id="videolibrary.actorthumbs" type="boolean" label="20402" help="36143">
           <level>1</level>
@@ -1706,6 +1719,10 @@
     </category>
     <category id="pvrclient" label="19279" help="36251">
       <group id="1">
+        <setting id="pvrclient.broswer" type="action" label="24019" help="24019">
+          <level>1</level>
+          <control type="button" format="action" />
+        </setting>
         <setting id="pvrclient.menuhook" type="action" label="19280" help="36252">
           <level>1</level>
           <control type="button" format="action" />
@@ -2196,6 +2213,20 @@
           </control>
         </setting>
       </group>
+      <group id="3">
+        <setting id="plex.limithometo" type="integer" label="37052" help="37053">
+          <level>0</level>
+          <default>2</default>
+          <constraints>
+            <options>
+              <option label="231">1</option>  <!-- None -->
+              <option label="37050">2</option>  <!--Local server only-->
+              <option label="37051">3</option>  <!--All servers-->
+            </options>
+          </constraints>
+          <control type="list" format="integer" />
+        </setting>
+      </group>
       <group id="2">
         <setting id="plex.transcode" type="boolean" label="1252" help="1253">
           <level>0</level>
@@ -2258,6 +2289,92 @@
           </constraints>
           <control type="edit" format="string" />
           <visible>false</visible>
+        </setting>
+      </group>
+    </category>
+    <category id="emby" label="2105" help="2106">
+      <group id="1">
+        <setting id="emby.signin" type="string" label="2107" help="2108">
+          <level>0</level>
+          <default>Sign-in</default>
+          <dependencies>
+            <dependency type="enable">
+              <condition on="property" name="embysignin" setting="emby.signinpin" />
+            </dependency>
+          </dependencies>
+          <control type="button" format="action"/>
+        </setting>
+        <setting id="emby.signinpin" type="string" label="2109" help="2110">
+          <level>0</level>
+          <default>Sign-in</default>
+          <dependencies>
+            <dependency type="enable">
+              <condition on="property" name="embysigninpin" setting="emby.signin" />
+            </dependency>
+          </dependencies>
+          <control type="button" format="action"/>
+        </setting>
+        <setting id="emby.serversources" type="string" parent="emby.signinpin" label="2111" help="2112">
+          <level>0</level>
+          <default>All Sources</default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="button" format="action"/>
+        </setting>
+        <setting id="emby.userid" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
+        <setting id="emby.serverurl" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
+        <setting id="emby.accesstoken" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
+        <setting id="emby.savedsources" type="list[string]" label="" help="">
+          <level>0</level>
+          <default>None</default>
+          <constraints>
+            <allowempty>true</allowempty>
+            <delimiter>|</delimiter>
+            <minimumitems>0</minimumitems>
+          </constraints>
+          <control type="list" format="string">
+            <multiselect>true</multiselect>
+          </control>
+          <visible>false</visible>
+        </setting>
+      </group>
+      <group id="2">
+        <setting id="emby.limithometo" type="integer" label="2113" help="2114">
+          <level>0</level>
+          <default>2</default>
+          <constraints>
+            <options>
+              <option label="231">1</option>  <!-- None -->
+              <option label="37050">2</option>  <!--Local server only-->
+              <option label="37051">3</option>  <!--All servers-->
+            </options>
+          </constraints>
+          <control type="list" format="integer" />
         </setting>
       </group>
     </category>
@@ -2368,7 +2485,17 @@
             <allowempty>true</allowempty>
           </constraints>
           <control type="edit" format="string" />
-        </setting>                        
+        </setting>
+        <setting id="mysql.timeout" type="integer" label="36609" help="36632">
+          <level>1</level>
+          <default>60</default>
+          <constraints>
+            <minimum>1</minimum>
+            <step>1</step>
+            <maximum>60</maximum>
+          </constraints>
+          <control type="edit" format="integer" />
+        </setting>                     
       </group>
       <group id="2">
         <setting id="mysql.video" type="string" label="1265" help="1267">
@@ -3051,6 +3178,19 @@
           <default>1</default>
           <constraints>
             <options>audiostreamsilence</options>
+          </constraints>
+          <control type="list" format="string" />
+        </setting>
+        <setting id="audiooutput.streamsilencenoiseindex" parent="audiooutput.streamsilence" type="integer" label="34133" help="34134">
+          <level>2</level>
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="34129">0</option>
+              <option label="34130">1</option>
+              <option label="34131">2</option>
+              <option label="34132">3</option>
+            </options>
           </constraints>
           <control type="list" format="string" />
         </setting>

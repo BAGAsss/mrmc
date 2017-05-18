@@ -2626,6 +2626,9 @@ void CActiveAE::OnSettingsChange(const std::string& setting)
   {
     m_controlPort.SendOutMessage(CActiveAEControlProtocol::RECONFIGURE);
   }
+
+  if (setting == CSettings::SETTING_AUDIOOUTPUT_STREAMSILENCENOISEINDEX)
+    m_controlPort.SendOutMessage(CActiveAEControlProtocol::DEVICECHANGE);
 }
 
 bool CActiveAE::SupportsRaw(AEAudioFormat &format)
@@ -2746,10 +2749,15 @@ bool CActiveAE::IsSettingVisible(const std::string &settingId)
   }
   else if (settingId == CSettings::SETTING_AUDIOOUTPUT_DSPADDONSENABLED)
   {
+    // MrMC does not support Audio DSP
+    return false;
+    /*
+
     if (m_sink.GetDeviceType(CSettings::GetInstance().GetString(CSettings::SETTING_AUDIOOUTPUT_AUDIODEVICE)) != AE_DEVTYPE_IEC958)
     {
       return true;
     }
+    */
   }
   else if (settingId == CSettings::SETTING_AUDIOOUTPUT_DSPSETTINGS)
   {

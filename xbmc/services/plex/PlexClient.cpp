@@ -24,16 +24,19 @@
 
 #include "PlexClient.h"
 #include "PlexUtils.h"
+#include "PlexClientSync.h"
 
 #include "Application.h"
 #include "URL.h"
 #include "filesystem/CurlFile.h"
 #include "filesystem/StackDirectory.h"
 #include "network/Network.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
-#include "utils/Base64.h"
+#include "utils/Base64URL.h"
+#include "video/VideoInfoTag.h"
 
 #include <string>
 #include <sstream>
@@ -62,10 +65,11 @@ static bool IsInSubNet(CURL url)
 CPlexClient::CPlexClient()
 {
   m_local = true;
-  m_owned = true;
+  m_owned = "1";
   m_presence = true;
   m_protocol = "http";
   m_needUpdate = false;
+  m_clientSync = nullptr;
 }
 
 CPlexClient::~CPlexClient()
@@ -111,42 +115,24 @@ bool CPlexClient::Init(std::string data, std::string ip)
   return !m_url.empty();
 }
 
-bool CPlexClient::Init(const TiXmlElement* DeviceNode)
+bool CPlexClient::Init(const PlexServerInfo &serverInfo)
 {
   m_url = "";
-  m_presence = XMLUtils::GetAttribute(DeviceNode, "presence") == "1";
+  m_presence = serverInfo.presence == "1";
   //if (!m_presence)
   //  return false;
 
-  m_uuid = XMLUtils::GetAttribute(DeviceNode, "clientIdentifier");
-  m_owned = XMLUtils::GetAttribute(DeviceNode, "owned");
-  m_serverName = XMLUtils::GetAttribute(DeviceNode, "name");
-  m_accessToken = XMLUtils::GetAttribute(DeviceNode, "accessToken");
-  m_httpsRequired = XMLUtils::GetAttribute(DeviceNode, "httpsRequired");
-  m_platform = XMLUtils::GetAttribute(DeviceNode, "platform");
-
-  std::vector<PlexConnection> connections;
-  const TiXmlElement* ConnectionNode = DeviceNode->FirstChildElement("Connection");
-  while (ConnectionNode)
-  {
-    PlexConnection connection;
-    connection.port = XMLUtils::GetAttribute(ConnectionNode, "port");
-    connection.address = XMLUtils::GetAttribute(ConnectionNode, "address");
-    connection.protocol = XMLUtils::GetAttribute(ConnectionNode, "protocol");
-    connection.external = XMLUtils::GetAttribute(ConnectionNode, "local") == "0" ? 1 : 0;
-    connections.push_back(connection);
-
-    ConnectionNode = ConnectionNode->NextSiblingElement("Connection");
-  }
+  m_uuid = serverInfo.uuid;
+  m_owned = serverInfo.owned;
+  m_serverName = serverInfo.serverName;
+  m_accessToken = serverInfo.accessToken;
+  m_httpsRequired = serverInfo.httpsRequired;
+  m_platform = serverInfo.platform;
 
   CURL url;
-  if (!connections.empty())
+  if (!serverInfo.connections.empty())
   {
-    // sort so that all external=0 are first. These are the local connections.
-    std::sort(connections.begin(), connections.end(),
-      [] (PlexConnection const& a, PlexConnection const& b) { return a.external < b.external; });
-
-    for (const auto &connection : connections)
+    for (const auto &connection : serverInfo.connections)
     {
       url.SetHostName(connection.address);
       url.SetPort(atoi(connection.port.c_str()));
@@ -167,7 +153,31 @@ bool CPlexClient::Init(const TiXmlElement* DeviceNode)
     }
   }
 
+/*
+  if (m_clientSync)
+    SAFE_DELETE(m_clientSync);
+
+  m_clientSync = new CPlexClientSync(IsOwned(), m_serverName, url.GetWithoutFilename(),
+    CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID).c_str(), m_accessToken);
+  m_clientSync->Start();
+*/
+
   return !m_url.empty();
+}
+
+CFileItemPtr CPlexClient::FindViewItemByServiceId(const std::string &serviceId)
+{
+  //CSingleLock lock(m_viewItemsLock);
+  for (const auto &item : m_section_items)
+  {
+    if (item->GetMediaServiceId() == serviceId)
+    {
+      CLog::Log(LOGDEBUG, "CPlexClient::FindViewItemByServiceId: \"%s\"", item->GetLabel().c_str());
+      return item;
+    }
+  }
+  CLog::Log(LOGERROR, "CPlexClient::FindViewItemByServiceId: failed to get details for item with id \"%s\"", serviceId.c_str());
+  return nullptr;
 }
 
 std::string CPlexClient::GetUrl()
@@ -219,40 +229,11 @@ const std::string CPlexClient::FormatContentTitle(const std::string contentTitle
   return title;
 }
 
-std::string CPlexClient::FindSectionTitle(const std::string &path)
-{
-  CURL real_url(path);
-  if (real_url.GetProtocol() == "plex")
-    real_url = CURL(Base64::Decode(URIUtils::GetFileName(real_url)));
-
-  if (!real_url.GetFileName().empty())
-  {
-    {
-      CSingleLock lock(m_criticalMovies);
-      for (const auto &contents : m_movieSectionsContents)
-      {
-        if (real_url.GetFileName().find(contents.section) != std::string::npos)
-          return contents.title;
-      }
-    }
-    {
-      CSingleLock lock(m_criticalTVShow);
-      for (const auto &contents : m_showSectionsContents)
-      {
-        if (real_url.GetFileName().find(contents.section) != std::string::npos)
-          return contents.title;
-      }
-    }
-  }
-
-  return "";
-}
-
 bool CPlexClient::IsSameClientHostName(const CURL& url)
 {
   CURL real_url(url);
   if (real_url.GetProtocol() == "plex")
-    real_url = CURL(Base64::Decode(URIUtils::GetFileName(real_url)));
+    real_url = CURL(Base64URL::Decode(URIUtils::GetFileName(real_url)));
 
   if (URIUtils::IsStack(real_url.Get()))
     real_url = CURL(XFILE::CStackDirectory::GetFirstStackedFile(real_url.Get()));
@@ -260,36 +241,11 @@ bool CPlexClient::IsSameClientHostName(const CURL& url)
   return GetHost() == real_url.GetHostName();
 }
 
-std::string CPlexClient::LookUpUuid(const std::string path) const
-{
-  std::string uuid;
-
-  CURL url(path);
-  {
-    CSingleLock lock(m_criticalMovies);
-    for (const auto &contents : m_movieSectionsContents)
-    {
-      if (contents.section == url.GetFileName())
-        return m_uuid;
-    }
-  }
-  {
-    CSingleLock lock(m_criticalTVShow);
-    for (const auto &contents : m_showSectionsContents)
-    {
-      if (contents.section == url.GetFileName())
-        return m_uuid;
-    }
-  }
-
-  return uuid;
-}
-
-bool CPlexClient::ParseSections(PlexSectionParsing parser)
+bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
 {
   bool rtn = false;
   XFILE::CCurlFile plex;
-  plex.SetBufferSize(32768*10);
+  //plex.SetBufferSize(32768*10);
   plex.SetTimeout(10);
 
   CURL curl(m_url);
@@ -298,7 +254,7 @@ bool CPlexClient::ParseSections(PlexSectionParsing parser)
   if (plex.Get(curl.Get(), strResponse))
   {
 #if defined(PLEX_DEBUG_VERBOSE)
-    if (parser == PlexSectionParsing::newSection || parser == PlexSectionParsing::checkSection)
+    if (parser == PlexSectionParsing::newSection)
       CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %d, %s", parser, strResponse.c_str());
 #endif
     if (parser == PlexSectionParsing::updateSection)
@@ -325,7 +281,7 @@ bool CPlexClient::ParseSections(PlexSectionParsing parser)
       {
         PlexSectionsContent content;
         content.uuid = XMLUtils::GetAttribute(DirectoryNode, "uuid");
-        content.path = XMLUtils::GetAttribute(DirectoryNode, "path");
+        //content.path = XMLUtils::GetAttribute(DirectoryNode, "path");
         content.type = XMLUtils::GetAttribute(DirectoryNode, "type");
         content.title = XMLUtils::GetAttribute(DirectoryNode, "title");
         content.updatedAt = XMLUtils::GetAttribute(DirectoryNode, "updatedAt");
@@ -449,14 +405,17 @@ bool CPlexClient::ParseSections(PlexSectionParsing parser)
         DirectoryNode = DirectoryNode->NextSiblingElement("Directory");
       }
 
-      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d movie sections",
-        m_serverName.c_str(), (int)m_movieSectionsContents.size());
-      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d shows sections",
-        m_serverName.c_str(), (int)m_showSectionsContents.size());
-      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d artist sections",
-                m_serverName.c_str(), (int)m_artistSectionsContents.size());
-      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d photo sections",
-                m_serverName.c_str(), (int)m_photoSectionsContents.size());
+      if (parser == PlexSectionParsing::newSection)
+      {
+        CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d movie sections",
+          m_serverName.c_str(), (int)m_movieSectionsContents.size());
+        CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d shows sections",
+          m_serverName.c_str(), (int)m_showSectionsContents.size());
+        CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d artist sections",
+                  m_serverName.c_str(), (int)m_artistSectionsContents.size());
+        CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d photo sections",
+                  m_serverName.c_str(), (int)m_photoSectionsContents.size());
+      }
 
       rtn = true;
     }

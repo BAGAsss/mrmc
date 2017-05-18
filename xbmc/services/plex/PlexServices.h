@@ -27,6 +27,7 @@
 #include "filesystem/CurlFile.h"
 #include "threads/Thread.h"
 #include "threads/CriticalSection.h"
+#include "services/ServicesManager.h"
 #include "settings/lib/ISettingCallback.h"
 #include "interfaces/IAnnouncer.h"
 #include "utils/JobManager.h"
@@ -36,13 +37,6 @@ namespace SOCKETS
   class CUDPSocket;
   class CSocketListener;
 }
-
-enum class PlexServicePlayerState
-{
-  paused = 1,
-  playing = 2,
-  stopped = 3,
-};
 
 class CPlexClient;
 typedef std::shared_ptr<CPlexClient> CPlexClientPtr;
@@ -66,6 +60,7 @@ public:
   void GetClients(std::vector<CPlexClientPtr> &clients) const;
   CPlexClientPtr FindClient(const std::string &path);
   bool ClientIsLocal(std::string path);
+  MediaServicesPlayerState GetPlayState() { return m_playState; };
 
   // ISettingCallback
   virtual void OnSettingAction(const CSetting *setting) override;
@@ -97,10 +92,11 @@ private:
 
   void              CheckForGDMServers();
 
+  PlexServerInfo    ParsePlexDeviceNode(const TiXmlElement* DeviceNode);
+
   CPlexClientPtr    GetClient(std::string uuid);
   bool              AddClient(CPlexClientPtr foundClient);
   bool              RemoveClient(CPlexClientPtr lostClient);
-  bool              UpdateClient(CPlexClientPtr updateClient);
   bool              GetMyHomeUsers(std::string &homeusername);
 
   std::atomic<bool> m_active;
@@ -116,7 +112,7 @@ private:
   int               m_updateMins;
   XFILE::CCurlFile  m_plextv;
 
-  PlexServicePlayerState m_playState;
+  MediaServicesPlayerState m_playState;
   CCriticalSection  m_criticalClients;
   std::atomic<bool> m_hasClients;
   std::vector<CPlexClientPtr> m_clients;

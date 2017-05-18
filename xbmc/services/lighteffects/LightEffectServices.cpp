@@ -24,6 +24,7 @@
 #include "cores/VideoRenderers/RenderManager.h"
 #include "cores/VideoRenderers/RenderCapture.h"
 #include "dialogs/GUIDialogKaiToast.h"
+#include "interfaces/AnnouncementManager.h"
 #include "settings/lib/Setting.h"
 #include "settings/Settings.h"
 #include "utils/log.h"
@@ -42,10 +43,14 @@ CLightEffectServices::CLightEffectServices()
 , m_staticON(false)
 , m_lightsON(true)
 {
+  CAnnouncementManager::GetInstance().AddAnnouncer(this);
 }
 
 CLightEffectServices::~CLightEffectServices()
 {
+  if (m_lighteffect)
+    m_lighteffect->SetPriority(255);
+  CAnnouncementManager::GetInstance().RemoveAnnouncer(this);
   if (IsRunning())
     Stop();
 }
@@ -58,30 +63,31 @@ CLightEffectServices& CLightEffectServices::GetInstance()
 
 void CLightEffectServices::Announce(AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)
 {
+  // if setting is disabled, there is no need to even check these
+  if(!CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER))
+    return;
+  
   // this is not used on tvOS, needs testing on droid
   if (flag == GUI && !strcmp(sender, "xbmc") && !strcmp(message, "OnScreensaverDeactivated"))
   {
-    if (!CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER))
-    {
-      m_staticON = false;
+    m_staticON = false;
+    if (g_application.m_pPlayer->IsPlayingVideo() && m_lighteffect)
+      m_lighteffect->SetPriority(128);
+    else
       SetAllLightsToStaticRGB();
-    }
   }
   else if (flag == GUI && !strcmp(sender, "xbmc") && !strcmp(message, "OnScreensaverActivated"))
   {
-    if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER))
-    {
-      m_staticON = true;
-      if (m_lighteffect)
-        m_lighteffect->SetPriority(255);
-    }
+    m_staticON = true;
+    if (m_lighteffect)
+      m_lighteffect->SetPriority(255);
   }
 }
 
 void CLightEffectServices::Start()
 {
   CSingleLock lock(m_critical);
-  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE) && !IsRunning())
+  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE))
   {
     if (IsRunning())
       StopThread();
@@ -269,7 +275,8 @@ bool CLightEffectServices::InitConnection()
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info,
       g_localizeStrings.Get(882), g_localizeStrings.Get(883), 3000, true);
     const CSetting *setting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE);
-    ((CSettingBool*)setting)->SetValue(false);
+    if (setting != NULL)
+      ((CSettingBool*)setting)->SetValue(false);
     
     SAFE_DELETE(m_lighteffect);
     return false;

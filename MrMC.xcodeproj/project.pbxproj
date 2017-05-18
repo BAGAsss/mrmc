@@ -12,6 +12,9 @@
 		183CB23B1C0B4C5A004218C2 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 183CB23A1C0B4C5A004218C2 /* Images.xcassets */; };
 		1840B74D13993D8A007C848B /* JSONVariantParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1840B74B13993D8A007C848B /* JSONVariantParser.cpp */; };
 		1840B75313993DA0007C848B /* JSONVariantWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1840B75113993DA0007C848B /* JSONVariantWriter.cpp */; };
+		184565C21EA1F45400C5DABB /* Base64URL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 184565C01EA1F45400C5DABB /* Base64URL.cpp */; };
+		184565C31EA1F45400C5DABB /* Base64URL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 184565C01EA1F45400C5DABB /* Base64URL.cpp */; };
+		184565C41EA1F45400C5DABB /* Base64URL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 184565C01EA1F45400C5DABB /* Base64URL.cpp */; };
 		184C472F1296BC6E0006DB3E /* Service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 184C472D1296BC6E0006DB3E /* Service.cpp */; };
 		18690DCE1B94DA6200E762C1 /* OpenSubtitlesSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18690DCC1B94DA6200E762C1 /* OpenSubtitlesSearch.cpp */; };
 		18690DCF1B94DA6200E762C1 /* OpenSubtitlesSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18690DCC1B94DA6200E762C1 /* OpenSubtitlesSearch.cpp */; };
@@ -135,6 +138,9 @@
 		18B7C938129428CA009E7A26 /* SmartPlayList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C92D129428CA009E7A26 /* SmartPlayList.cpp */; };
 		18B7C97C1294380A009E7A26 /* GUIWindowAddonBrowser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C97A12943809009E7A26 /* GUIWindowAddonBrowser.cpp */; };
 		18B7C9831294385F009E7A26 /* XMLUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C9811294385F009E7A26 /* XMLUtils.cpp */; };
+		18BBE8DF1E7EEBDE00B36525 /* ServicesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18BBE8DD1E7EEBDE00B36525 /* ServicesDirectory.cpp */; };
+		18BBE8E01E7EEBDE00B36525 /* ServicesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18BBE8DD1E7EEBDE00B36525 /* ServicesDirectory.cpp */; };
+		18BBE8E11E7EEBDE00B36525 /* ServicesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18BBE8DD1E7EEBDE00B36525 /* ServicesDirectory.cpp */; };
 		18C1D22D13033F6A00CFFE59 /* GLUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18C1D22B13033F6A00CFFE59 /* GLUtils.cpp */; };
 		18D18CE81D0DC14400BBAB05 /* PlexUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18D18CE61D0DC14400BBAB05 /* PlexUtils.cpp */; };
 		18D18CE91D0DC14400BBAB05 /* PlexUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18D18CE61D0DC14400BBAB05 /* PlexUtils.cpp */; };
@@ -1783,8 +1789,29 @@
 		F52BFFDB115D5574004B1D66 /* AddonStatusHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F52BFFDA115D5574004B1D66 /* AddonStatusHandler.cpp */; };
 		F52CC5F01713AAA200113454 /* DirectoryNodeGrouped.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F52CC5EE1713AAA200113454 /* DirectoryNodeGrouped.cpp */; };
 		F52CC6AA1713BD2B00113454 /* DirectoryNodeGrouped.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F52CC6A81713BD2B00113454 /* DirectoryNodeGrouped.cpp */; };
+		F534EDA21E8D8BD60009D1A1 /* EmbyViewCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F534EDA01E8D8BD60009D1A1 /* EmbyViewCache.cpp */; };
+		F534EDA31E8D8BD60009D1A1 /* EmbyViewCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F534EDA01E8D8BD60009D1A1 /* EmbyViewCache.cpp */; };
+		F534EDA41E8D8BD60009D1A1 /* EmbyViewCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F534EDA01E8D8BD60009D1A1 /* EmbyViewCache.cpp */; };
 		F5364D34155B3B270016D00B /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5364D33155B3B270016D00B /* CoreVideo.framework */; };
 		F5364E05155B3CAF0016D00B /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5364E04155B3CAF0016D00B /* IOSurface.framework */; };
+		F5471B181E8562AA00570A53 /* EmbyDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B161E8562AA00570A53 /* EmbyDirectory.cpp */; };
+		F5471B191E8562AA00570A53 /* EmbyDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B161E8562AA00570A53 /* EmbyDirectory.cpp */; };
+		F5471B1A1E8562AA00570A53 /* EmbyDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B161E8562AA00570A53 /* EmbyDirectory.cpp */; };
+		F5471B241E8562C100570A53 /* EmbyClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B1C1E8562C100570A53 /* EmbyClient.cpp */; };
+		F5471B251E8562C100570A53 /* EmbyClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B1C1E8562C100570A53 /* EmbyClient.cpp */; };
+		F5471B261E8562C100570A53 /* EmbyClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B1C1E8562C100570A53 /* EmbyClient.cpp */; };
+		F5471B271E8562C100570A53 /* EmbyClientSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B1E1E8562C100570A53 /* EmbyClientSync.cpp */; };
+		F5471B281E8562C100570A53 /* EmbyClientSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B1E1E8562C100570A53 /* EmbyClientSync.cpp */; };
+		F5471B291E8562C100570A53 /* EmbyClientSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B1E1E8562C100570A53 /* EmbyClientSync.cpp */; };
+		F5471B2A1E8562C100570A53 /* EmbyServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B201E8562C100570A53 /* EmbyServices.cpp */; };
+		F5471B2B1E8562C100570A53 /* EmbyServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B201E8562C100570A53 /* EmbyServices.cpp */; };
+		F5471B2C1E8562C100570A53 /* EmbyServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B201E8562C100570A53 /* EmbyServices.cpp */; };
+		F5471B2D1E8562C100570A53 /* EmbyUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B221E8562C100570A53 /* EmbyUtils.cpp */; };
+		F5471B2E1E8562C100570A53 /* EmbyUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B221E8562C100570A53 /* EmbyUtils.cpp */; };
+		F5471B2F1E8562C100570A53 /* EmbyUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B221E8562C100570A53 /* EmbyUtils.cpp */; };
+		F5471B321E85647800570A53 /* PlexClientSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B301E85647800570A53 /* PlexClientSync.cpp */; };
+		F5471B331E85647800570A53 /* PlexClientSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B301E85647800570A53 /* PlexClientSync.cpp */; };
+		F5471B341E85647800570A53 /* PlexClientSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5471B301E85647800570A53 /* PlexClientSync.cpp */; };
 		F548786D0FE060FF00E506FD /* DVDSubtitleParserMPL2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F548786C0FE060FF00E506FD /* DVDSubtitleParserMPL2.cpp */; };
 		F5487B4C0FE6F02700E506FD /* StreamDetails.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5487B4B0FE6F02700E506FD /* StreamDetails.cpp */; };
 		F557CD981CFDE37000DC3D50 /* TCPClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F557CD961CFDE37000DC3D50 /* TCPClient.cpp */; };
@@ -3248,6 +3275,9 @@
 		F5FBE7DC1E2AB65F001B85EE /* strutl.c in Sources */ = {isa = PBXBuildFile; fileRef = F5FBE7DA1E2AB65F001B85EE /* strutl.c */; };
 		F5FBE7DD1E2AB65F001B85EE /* strutl.c in Sources */ = {isa = PBXBuildFile; fileRef = F5FBE7DA1E2AB65F001B85EE /* strutl.c */; };
 		F5FBE7DE1E2AB65F001B85EE /* strutl.c in Sources */ = {isa = PBXBuildFile; fileRef = F5FBE7DA1E2AB65F001B85EE /* strutl.c */; };
+		F5FC88E31E61E44D00449E85 /* easywsclient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FC88E01E61E44D00449E85 /* easywsclient.cpp */; };
+		F5FC88E41E61E44D00449E85 /* easywsclient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FC88E01E61E44D00449E85 /* easywsclient.cpp */; };
+		F5FC88E51E61E44D00449E85 /* easywsclient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FC88E01E61E44D00449E85 /* easywsclient.cpp */; };
 		F5FDF51D0E7218950005B0A6 /* AsyncFileCopy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FDF51C0E7218950005B0A6 /* AsyncFileCopy.cpp */; };
 /* End PBXBuildFile section */
 
@@ -3294,6 +3324,8 @@
 		1840B74C13993D8A007C848B /* JSONVariantParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONVariantParser.h; sourceTree = "<group>"; };
 		1840B75113993DA0007C848B /* JSONVariantWriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JSONVariantWriter.cpp; sourceTree = "<group>"; };
 		1840B75213993DA0007C848B /* JSONVariantWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONVariantWriter.h; sourceTree = "<group>"; };
+		184565C01EA1F45400C5DABB /* Base64URL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Base64URL.cpp; sourceTree = "<group>"; };
+		184565C11EA1F45400C5DABB /* Base64URL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Base64URL.h; sourceTree = "<group>"; };
 		184C472D1296BC6E0006DB3E /* Service.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Service.cpp; sourceTree = "<group>"; };
 		184C472E1296BC6E0006DB3E /* Service.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Service.h; sourceTree = "<group>"; };
 		18576525156ED3710088C35A /* README.osx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README.osx; path = docs/README.osx; sourceTree = "<group>"; };
@@ -3553,6 +3585,8 @@
 		18B7C9811294385F009E7A26 /* XMLUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XMLUtils.cpp; sourceTree = "<group>"; };
 		18B7C9821294385F009E7A26 /* XMLUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLUtils.h; sourceTree = "<group>"; };
 		18B7C9E7129447B9009E7A26 /* MathUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MathUtils.h; sourceTree = "<group>"; };
+		18BBE8DD1E7EEBDE00B36525 /* ServicesDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ServicesDirectory.cpp; sourceTree = "<group>"; };
+		18BBE8DE1E7EEBDE00B36525 /* ServicesDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServicesDirectory.h; sourceTree = "<group>"; };
 		18C1D22B13033F6A00CFFE59 /* GLUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLUtils.cpp; sourceTree = "<group>"; };
 		18C1D22C13033F6A00CFFE59 /* GLUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLUtils.h; sourceTree = "<group>"; };
 		18D18CE61D0DC14400BBAB05 /* PlexUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlexUtils.cpp; sourceTree = "<group>"; };
@@ -5273,6 +5307,8 @@
 		F52CC5EF1713AAA200113454 /* DirectoryNodeGrouped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DirectoryNodeGrouped.h; sourceTree = "<group>"; };
 		F52CC6A81713BD2B00113454 /* DirectoryNodeGrouped.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DirectoryNodeGrouped.cpp; sourceTree = "<group>"; };
 		F52CC6A91713BD2B00113454 /* DirectoryNodeGrouped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DirectoryNodeGrouped.h; sourceTree = "<group>"; };
+		F534EDA01E8D8BD60009D1A1 /* EmbyViewCache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EmbyViewCache.cpp; sourceTree = "<group>"; };
+		F534EDA11E8D8BD60009D1A1 /* EmbyViewCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmbyViewCache.h; sourceTree = "<group>"; };
 		F536166E1B94E61200BD5776 /* sha1.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = sha1.hpp; sourceTree = "<group>"; };
 		F5364D33155B3B270016D00B /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = /System/Library/Frameworks/CoreVideo.framework; sourceTree = "<absolute>"; };
 		F5364E04155B3CAF0016D00B /* IOSurface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOSurface.framework; path = /System/Library/Frameworks/IOSurface.framework; sourceTree = "<absolute>"; };
@@ -5280,6 +5316,18 @@
 		F54570851BF5947A00432C6A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F54570881BF5955900432C6A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F54570891BF5955900432C6A /* Info.plist.in */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Info.plist.in; sourceTree = "<group>"; };
+		F5471B161E8562AA00570A53 /* EmbyDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EmbyDirectory.cpp; sourceTree = "<group>"; };
+		F5471B171E8562AA00570A53 /* EmbyDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmbyDirectory.h; sourceTree = "<group>"; };
+		F5471B1C1E8562C100570A53 /* EmbyClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EmbyClient.cpp; sourceTree = "<group>"; };
+		F5471B1D1E8562C100570A53 /* EmbyClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmbyClient.h; sourceTree = "<group>"; };
+		F5471B1E1E8562C100570A53 /* EmbyClientSync.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EmbyClientSync.cpp; sourceTree = "<group>"; };
+		F5471B1F1E8562C100570A53 /* EmbyClientSync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmbyClientSync.h; sourceTree = "<group>"; };
+		F5471B201E8562C100570A53 /* EmbyServices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EmbyServices.cpp; sourceTree = "<group>"; };
+		F5471B211E8562C100570A53 /* EmbyServices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmbyServices.h; sourceTree = "<group>"; };
+		F5471B221E8562C100570A53 /* EmbyUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EmbyUtils.cpp; sourceTree = "<group>"; };
+		F5471B231E8562C100570A53 /* EmbyUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmbyUtils.h; sourceTree = "<group>"; };
+		F5471B301E85647800570A53 /* PlexClientSync.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlexClientSync.cpp; sourceTree = "<group>"; };
+		F5471B311E85647800570A53 /* PlexClientSync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlexClientSync.h; sourceTree = "<group>"; };
 		F548786B0FE060FF00E506FD /* DVDSubtitleParserMPL2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDSubtitleParserMPL2.h; sourceTree = "<group>"; };
 		F548786C0FE060FF00E506FD /* DVDSubtitleParserMPL2.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = DVDSubtitleParserMPL2.cpp; sourceTree = "<group>"; };
 		F5487B4A0FE6F02700E506FD /* StreamDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamDetails.h; sourceTree = "<group>"; };
@@ -5868,6 +5916,8 @@
 		F5FBE7DA1E2AB65F001B85EE /* strutl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = strutl.c; sourceTree = "<group>"; };
 		F5FBE7DB1E2AB65F001B85EE /* strutl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = strutl.h; sourceTree = "<group>"; };
 		F5FBE7DF1E2AC87A001B85EE /* log_control.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = log_control.h; sourceTree = "<group>"; };
+		F5FC88E01E61E44D00449E85 /* easywsclient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = easywsclient.cpp; sourceTree = "<group>"; };
+		F5FC88E11E61E44D00449E85 /* easywsclient.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = easywsclient.hpp; sourceTree = "<group>"; };
 		F5FDF51B0E7218950005B0A6 /* AsyncFileCopy.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AsyncFileCopy.h; sourceTree = "<group>"; };
 		F5FDF51C0E7218950005B0A6 /* AsyncFileCopy.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AsyncFileCopy.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -8505,6 +8555,8 @@
 				F559021C1C30A2BD00349249 /* DSMDirectory.h */,
 				F559021D1C30A2BD00349249 /* DSMFile.cpp */,
 				F559021E1C30A2BD00349249 /* DSMFile.h */,
+				F5471B161E8562AA00570A53 /* EmbyDirectory.cpp */,
+				F5471B171E8562AA00570A53 /* EmbyDirectory.h */,
 				DF29BD001B5D913B00904347 /* EventsDirectory.cpp */,
 				DF29BD011B5D913B00904347 /* EventsDirectory.h */,
 				0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */,
@@ -8601,6 +8653,8 @@
 				E4DC97510FFE5BA8008E0C07 /* SAPDirectory.h */,
 				E4DC97520FFE5BA8008E0C07 /* SAPFile.cpp */,
 				E4DC97530FFE5BA8008E0C07 /* SAPFile.h */,
+				18BBE8DD1E7EEBDE00B36525 /* ServicesDirectory.cpp */,
+				18BBE8DE1E7EEBDE00B36525 /* ServicesDirectory.h */,
 				F5A7B37C113AFB900059D6AA /* SFTPDirectory.cpp */,
 				F5A7B37D113AFB900059D6AA /* SFTPDirectory.h */,
 				DF93D6851444A8B0007C6459 /* SFTPFile.cpp */,
@@ -8861,6 +8915,8 @@
 				7C908893196358A8003D0619 /* auto_buffer.h */,
 				DF52769A151BAEDA00B5B63B /* Base64.cpp */,
 				DF52769B151BAEDA00B5B63B /* Base64.h */,
+				184565C01EA1F45400C5DABB /* Base64URL.cpp */,
+				184565C11EA1F45400C5DABB /* Base64URL.h */,
 				F56353BD16E9BB3500D21BAD /* BitstreamConverter.cpp */,
 				F56353BE16E9BB3500D21BAD /* BitstreamConverter.h */,
 				F5A0E24F1E3A63050086B1D1 /* BitstreamReader.cpp */,
@@ -9283,15 +9339,34 @@
 			path = vm;
 			sourceTree = "<group>";
 		};
+		F5471B1B1E8562C100570A53 /* emby */ = {
+			isa = PBXGroup;
+			children = (
+				F534EDA01E8D8BD60009D1A1 /* EmbyViewCache.cpp */,
+				F534EDA11E8D8BD60009D1A1 /* EmbyViewCache.h */,
+				F5471B1C1E8562C100570A53 /* EmbyClient.cpp */,
+				F5471B1D1E8562C100570A53 /* EmbyClient.h */,
+				F5471B1E1E8562C100570A53 /* EmbyClientSync.cpp */,
+				F5471B1F1E8562C100570A53 /* EmbyClientSync.h */,
+				F5471B201E8562C100570A53 /* EmbyServices.cpp */,
+				F5471B211E8562C100570A53 /* EmbyServices.h */,
+				F5471B221E8562C100570A53 /* EmbyUtils.cpp */,
+				F5471B231E8562C100570A53 /* EmbyUtils.h */,
+			);
+			path = emby;
+			sourceTree = "<group>";
+		};
 		F55BD2FF1D0A14ED0072FE3A /* plex */ = {
 			isa = PBXGroup;
 			children = (
-				18D18CE61D0DC14400BBAB05 /* PlexUtils.cpp */,
-				18D18CE71D0DC14400BBAB05 /* PlexUtils.h */,
 				F55BD30A1D18C70B0072FE3A /* PlexClient.cpp */,
 				F55BD30B1D18C70B0072FE3A /* PlexClient.h */,
+				F5471B301E85647800570A53 /* PlexClientSync.cpp */,
+				F5471B311E85647800570A53 /* PlexClientSync.h */,
 				F55BD3001D0A14ED0072FE3A /* PlexServices.cpp */,
 				F55BD3011D0A14ED0072FE3A /* PlexServices.h */,
+				18D18CE61D0DC14400BBAB05 /* PlexUtils.cpp */,
+				18D18CE71D0DC14400BBAB05 /* PlexUtils.h */,
 			);
 			path = plex;
 			sourceTree = "<group>";
@@ -9337,6 +9412,7 @@
 			children = (
 				F55BD31B1D246E240072FE3A /* ServicesManager.cpp */,
 				F55BD3191D22423D0072FE3A /* ServicesManager.h */,
+				F5471B1B1E8562C100570A53 /* emby */,
 				F55BD2FF1D0A14ED0072FE3A /* plex */,
 				F58BF96E1CD83FAF005BB003 /* lighteffects */,
 			);
@@ -9539,6 +9615,7 @@
 		F5B722B11C7BC10B006432AE /* contrib */ = {
 			isa = PBXGroup;
 			children = (
+				F5FC88DF1E61E44D00449E85 /* easywsclient */,
 				F5B722B21C7BC10B006432AE /* kissfft */,
 			);
 			path = contrib;
@@ -9881,6 +9958,15 @@
 				43348AAB1077486D00F859CF /* PlayerSelectionRule.h */,
 			);
 			name = playercorefactory;
+			sourceTree = "<group>";
+		};
+		F5FC88DF1E61E44D00449E85 /* easywsclient */ = {
+			isa = PBXGroup;
+			children = (
+				F5FC88E01E61E44D00449E85 /* easywsclient.cpp */,
+				F5FC88E11E61E44D00449E85 /* easywsclient.hpp */,
+			);
+			path = easywsclient;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -10383,6 +10469,7 @@
 				F5B723A51C7C9B77006432AE /* CDDADirectory.cpp in Sources */,
 				E38E1FF80D25F9FD00618676 /* Database.cpp in Sources */,
 				E38E1FFB0D25F9FD00618676 /* DNSNameCache.cpp in Sources */,
+				F5471B2A1E8562C100570A53 /* EmbyServices.cpp in Sources */,
 				E38E1FFC0D25F9FD00618676 /* DynamicDll.cpp in Sources */,
 				E38E1FFF0D25F9FD00618676 /* FileItem.cpp in Sources */,
 				F5022F451E2D4404001BBF75 /* HDHomeRunFile.cpp in Sources */,
@@ -10417,6 +10504,7 @@
 				E38E203C0D25F9FD00618676 /* DirectoryNodeAlbumTop100.cpp in Sources */,
 				E38E203D0D25F9FD00618676 /* DirectoryNodeAlbumTop100Song.cpp in Sources */,
 				E38E203E0D25F9FD00618676 /* DirectoryNodeArtist.cpp in Sources */,
+				F5471B2D1E8562C100570A53 /* EmbyUtils.cpp in Sources */,
 				F5022F231E2D41D5001BBF75 /* hdhomerun_debug.c in Sources */,
 				F51D170C1E29950600A03C93 /* md5.c in Sources */,
 				E38E20400D25F9FD00618676 /* DirectoryNodeOverview.cpp in Sources */,
@@ -10510,6 +10598,7 @@
 				E38E20B20D25F9FD00618676 /* GUIWindowLoginScreen.cpp in Sources */,
 				E38E20B30D25F9FD00618676 /* GUIWindowMusicBase.cpp in Sources */,
 				E38E20B40D25F9FD00618676 /* GUIDialogMusicInfo.cpp in Sources */,
+				18BBE8DF1E7EEBDE00B36525 /* ServicesDirectory.cpp in Sources */,
 				E38E20B50D25F9FD00618676 /* GUIWindowMusicNav.cpp in Sources */,
 				F5B724961C7E150C006432AE /* cmddata.cpp in Sources */,
 				F5B723061C7C894F006432AE /* LibraryBuiltins.cpp in Sources */,
@@ -10705,6 +10794,7 @@
 				7CCF7FC9106A0DF500992676 /* TimeUtils.cpp in Sources */,
 				F5B723F01C7CA014006432AE /* cdioSupport.cpp in Sources */,
 				F57B6F801071B8B500079ACB /* JobManager.cpp in Sources */,
+				F5FC88E31E61E44D00449E85 /* easywsclient.cpp in Sources */,
 				F5E55B5D10741272006E788A /* DVDPlayerTeletext.cpp in Sources */,
 				F5B7233E1C7C9870006432AE /* GUIWindowWeather.cpp in Sources */,
 				F5E55B66107412DE006E788A /* GUIDialogTeletext.cpp in Sources */,
@@ -11045,6 +11135,7 @@
 				C84828DB156CFCD8005A996F /* PVRTimerInfoTag.cpp in Sources */,
 				F5B722FA1C7C894F006432AE /* CECBuiltins.cpp in Sources */,
 				F5022F321E2D41D5001BBF75 /* hdhomerun_video.c in Sources */,
+				184565C21EA1F45400C5DABB /* Base64URL.cpp in Sources */,
 				C84828DC156CFCD8005A996F /* PVRTimers.cpp in Sources */,
 				189448B41CD905B70036E391 /* LightEffectClient.cpp in Sources */,
 				C84828DD156CFCD8005A996F /* GUIViewStatePVR.cpp in Sources */,
@@ -11224,9 +11315,11 @@
 				F5CC22EE1814FF3B006B5E91 /* ActiveAESink.cpp in Sources */,
 				F5CC22EF1814FF3B006B5E91 /* ActiveAESound.cpp in Sources */,
 				F5B723A81C7C9B77006432AE /* CDDAFile.cpp in Sources */,
+				F534EDA21E8D8BD60009D1A1 /* EmbyViewCache.cpp in Sources */,
 				F5CC22F01814FF3B006B5E91 /* ActiveAEStream.cpp in Sources */,
 				F5CC22FF18150065006B5E91 /* ActorProtocol.cpp in Sources */,
 				F5CC2305181500B1006B5E91 /* EndianSwap.cpp in Sources */,
+				F5471B241E8562C100570A53 /* EmbyClient.cpp in Sources */,
 				F5CC230E18150118006B5E91 /* AESinkFactory.cpp in Sources */,
 				F5CC234918150277006B5E91 /* AESinkNULL.cpp in Sources */,
 				7C8AE84E189DE3CD00C33786 /* CoreAudioChannelLayout.cpp in Sources */,
@@ -11319,6 +11412,7 @@
 				7CCDA7BE192756250074CF51 /* NptFile.cpp in Sources */,
 				F5B723361C7C9681006432AE /* ContextMenuItem.cpp in Sources */,
 				7CCDA7C7192756250074CF51 /* NptHash.cpp in Sources */,
+				F5471B321E85647800570A53 /* PlexClientSync.cpp in Sources */,
 				DF1D2DED1B6E85EE002BB9DB /* XbtDirectory.cpp in Sources */,
 				7CCDA7D0192756250074CF51 /* NptHttp.cpp in Sources */,
 				7CCDA7D9192756250074CF51 /* NptJson.cpp in Sources */,
@@ -11358,6 +11452,7 @@
 				F5B7251F1C7E150C006432AE /* timefn.cpp in Sources */,
 				7CCDAAA9192756250074CF51 /* NptPosixTime.cpp in Sources */,
 				7CCDAAB2192756250074CF51 /* NptSelectableMessageQueue.cpp in Sources */,
+				F5471B181E8562AA00570A53 /* EmbyDirectory.cpp in Sources */,
 				F5B722BC1C7BC10B006432AE /* kiss_fft.c in Sources */,
 				7CCDAC8619275CA70074CF51 /* NptBsdNetwork.cpp in Sources */,
 				7CCDAC8F19275CA70074CF51 /* NptBsdResolver.cpp in Sources */,
@@ -11378,6 +11473,7 @@
 				F5A0E2561E3A63190086B1D1 /* BitstreamWriter.cpp in Sources */,
 				7CF80DC919710DC2003B2B34 /* KeyboardLayout.cpp in Sources */,
 				B179BD6B1AD8EA7B00EA8D49 /* InputCodingTableBaiduPY.cpp in Sources */,
+				F5471B271E8562C100570A53 /* EmbyClientSync.cpp in Sources */,
 				B179BD6E1AD8EA7B00EA8D49 /* InputCodingTableBasePY.cpp in Sources */,
 				B179BD711AD8EA7B00EA8D49 /* InputCodingTableFactory.cpp in Sources */,
 			);
@@ -11601,6 +11697,7 @@
 				E4991263174E5D8F00741B6D /* File.cpp in Sources */,
 				E4991264174E5D8F00741B6D /* FileCache.cpp in Sources */,
 				E4991265174E5D8F00741B6D /* FileDirectoryFactory.cpp in Sources */,
+				F5471B331E85647800570A53 /* PlexClientSync.cpp in Sources */,
 				E4991266174E5D8F00741B6D /* FileFactory.cpp in Sources */,
 				DF29BCEC1B5D911800904347 /* AddonManagementEvent.cpp in Sources */,
 				F5B722FE1C7C894F006432AE /* GUIBuiltins.cpp in Sources */,
@@ -11719,6 +11816,7 @@
 				E49912CF174E5DA000741B6D /* DirectoryNodeTvShowsOverview.cpp in Sources */,
 				E49912D0174E5DA000741B6D /* QueryParams.cpp in Sources */,
 				F5B723211C7C894F006432AE /* WeatherBuiltins.cpp in Sources */,
+				F5471B281E8562C100570A53 /* EmbyClientSync.cpp in Sources */,
 				E49912D1174E5DA000741B6D /* VideoDatabaseDirectory.cpp in Sources */,
 				E49912D2174E5DA000741B6D /* VirtualDirectory.cpp in Sources */,
 				E49912D6174E5DA000741B6D /* ZeroconfDirectory.cpp in Sources */,
@@ -11839,6 +11937,7 @@
 				E4991330174E5DAD00741B6D /* XBTF.cpp in Sources */,
 				E4991331174E5DAD00741B6D /* XBTFReader.cpp in Sources */,
 				E4991345174E5E5C00741B6D /* GenericTouchActionHandler.cpp in Sources */,
+				184565C31EA1F45400C5DABB /* Base64URL.cpp in Sources */,
 				F5F23CD21C4D479E004B223A /* AnnounceReceiver.mm in Sources */,
 				E499134B174E5E5C00741B6D /* ITouchInputHandling.cpp in Sources */,
 				E499134D174E5EB700741B6D /* SkinVariable.cpp in Sources */,
@@ -11938,6 +12037,7 @@
 				E49913B7174E5F3C00741B6D /* AirTunesServer.cpp in Sources */,
 				E49913B9174E5F3C00741B6D /* DNSNameCache.cpp in Sources */,
 				E49913BA174E5F3C00741B6D /* EventClient.cpp in Sources */,
+				F5471B2B1E8562C100570A53 /* EmbyServices.cpp in Sources */,
 				E49913BB174E5F3C00741B6D /* EventPacket.cpp in Sources */,
 				E49913BC174E5F3C00741B6D /* EventServer.cpp in Sources */,
 				E49913BD174E5F3C00741B6D /* GUIDialogAccessPoints.cpp in Sources */,
@@ -12099,6 +12199,7 @@
 				F5B725201C7E150C006432AE /* timefn.cpp in Sources */,
 				E4991447174E605900741B6D /* CharsetConverter.cpp in Sources */,
 				E4991448174E605900741B6D /* CPUInfo.cpp in Sources */,
+				F5FC88E41E61E44D00449E85 /* easywsclient.cpp in Sources */,
 				E4991449174E605900741B6D /* Crc32.cpp in Sources */,
 				E499144A174E605900741B6D /* CryptThreading.cpp in Sources */,
 				F51D16FB1E29950600A03C93 /* dvd_input.c in Sources */,
@@ -12109,6 +12210,7 @@
 				E4991453174E605900741B6D /* FileUtils.cpp in Sources */,
 				F5B723151C7C894F006432AE /* ProfileBuiltins.cpp in Sources */,
 				E4991454174E605900741B6D /* GLUtils.cpp in Sources */,
+				18BBE8E01E7EEBDE00B36525 /* ServicesDirectory.cpp in Sources */,
 				E4991455174E605900741B6D /* GroupUtils.cpp in Sources */,
 				E4991457174E605900741B6D /* HTMLUtil.cpp in Sources */,
 				E4991458174E605900741B6D /* HttpHeader.cpp in Sources */,
@@ -12140,6 +12242,7 @@
 				F59045881BA372A600DB589A /* OSXGNUReplacements.c in Sources */,
 				42DAC16F1A6E789E0066B4C8 /* PVRActionListener.cpp in Sources */,
 				E4991472174E605900741B6D /* SortUtils.cpp in Sources */,
+				F5471B191E8562AA00570A53 /* EmbyDirectory.cpp in Sources */,
 				F5B725141C7E150C006432AE /* strfn.cpp in Sources */,
 				E4991473174E605900741B6D /* Splash.cpp in Sources */,
 				E4991474174E605900741B6D /* Stopwatch.cpp in Sources */,
@@ -12304,6 +12407,7 @@
 				F5B723F11C7CA014006432AE /* cdioSupport.cpp in Sources */,
 				7C1409AA184015C9009F9411 /* InfoExpression.cpp in Sources */,
 				AE4E87A717354C4A00D15206 /* XSLTUtils.cpp in Sources */,
+				F534EDA31E8D8BD60009D1A1 /* EmbyViewCache.cpp in Sources */,
 				7C15DCBD1892481400FCE564 /* InfoBool.cpp in Sources */,
 				F5CC228E1814F7F7006B5E91 /* AESinkDARWINIOS.mm in Sources */,
 				F5CC22DF1814FF3B006B5E91 /* ActiveAE.cpp in Sources */,
@@ -12427,6 +12531,7 @@
 				7CCDAA8F192756250074CF51 /* NptPosixQueue.cpp in Sources */,
 				7CCDAA98192756250074CF51 /* NptPosixSystem.cpp in Sources */,
 				7CCDAAA1192756250074CF51 /* NptPosixThreads.cpp in Sources */,
+				F5471B251E8562C100570A53 /* EmbyClient.cpp in Sources */,
 				7CCDAAAA192756250074CF51 /* NptPosixTime.cpp in Sources */,
 				7CCDAAB3192756250074CF51 /* NptSelectableMessageQueue.cpp in Sources */,
 				7CCDAC8719275CA70074CF51 /* NptBsdNetwork.cpp in Sources */,
@@ -12440,6 +12545,7 @@
 				7CCDACCB19275D790074CF51 /* NptAppleLogConfig.mm in Sources */,
 				7CAA469119427AED00008885 /* PosixDirectory.cpp in Sources */,
 				7C525DF6195E2D8100BE3482 /* SaveFileStateJob.cpp in Sources */,
+				F5471B2E1E8562C100570A53 /* EmbyUtils.cpp in Sources */,
 				F5B724B41C7E150C006432AE /* extract.cpp in Sources */,
 				7C908895196358A8003D0619 /* auto_buffer.cpp in Sources */,
 				7CF80DCA19710DC2003B2B34 /* KeyboardLayout.cpp in Sources */,
@@ -12520,6 +12626,7 @@
 				F5D13F031BAF0B6D0075A95C /* DVDDemuxPVRClient.cpp in Sources */,
 				F51063441BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm in Sources */,
 				F5D13F041BAF0B6D0075A95C /* DVDDemuxShoutcast.cpp in Sources */,
+				F5471B2C1E8562C100570A53 /* EmbyServices.cpp in Sources */,
 				F5D13F051BAF0B6D0075A95C /* DVDDemuxUtils.cpp in Sources */,
 				F5B7237F1C7C9AC8006432AE /* BlurayDirectory.cpp in Sources */,
 				F5022F471E2D4404001BBF75 /* HDHomeRunFile.cpp in Sources */,
@@ -12554,6 +12661,7 @@
 				F5D13F1D1BAF0B6D0075A95C /* DVDSubtitleTagSami.cpp in Sources */,
 				F5D13F1E1BAF0B6D0075A95C /* DVDAudio.cpp in Sources */,
 				F5B725061C7E150C006432AE /* savepos.cpp in Sources */,
+				F5471B2F1E8562C100570A53 /* EmbyUtils.cpp in Sources */,
 				F5022F251E2D41D5001BBF75 /* hdhomerun_debug.c in Sources */,
 				F51D170E1E29950600A03C93 /* md5.c in Sources */,
 				F5D13F1F1BAF0B6D0075A95C /* DVDClock.cpp in Sources */,
@@ -12647,6 +12755,7 @@
 				F5D13F641BAF0B6D0075A95C /* GUIDialogSlider.cpp in Sources */,
 				F5D13F651BAF0B6D0075A95C /* GUIDialogSmartPlaylistEditor.cpp in Sources */,
 				F5D13F661BAF0B6D0075A95C /* GUIDialogSmartPlaylistRule.cpp in Sources */,
+				18BBE8E11E7EEBDE00B36525 /* ServicesDirectory.cpp in Sources */,
 				F5D13F671BAF0B6D0075A95C /* GUIDialogSubMenu.cpp in Sources */,
 				F5D13F681BAF0B6D0075A95C /* HTTPFileHandler.cpp in Sources */,
 				F5D13F691BAF0B6D0075A95C /* GUIDialogTextViewer.cpp in Sources */,
@@ -12842,6 +12951,7 @@
 				F5D140081BAF0B6D0075A95C /* VideoLibraryMarkWatchedJob.cpp in Sources */,
 				F5D140091BAF0B6D0075A95C /* GUIMultiImage.cpp in Sources */,
 				F5D1400A1BAF0B6D0075A95C /* GUIMultiSelectText.cpp in Sources */,
+				F5FC88E51E61E44D00449E85 /* easywsclient.cpp in Sources */,
 				F5D1400B1BAF0B6D0075A95C /* VideoLibraryScanningJob.cpp in Sources */,
 				F5D1400C1BAF0B6D0075A95C /* GUIPanelContainer.cpp in Sources */,
 				F5D1400D1BAF0B6D0075A95C /* GUIProgressControl.cpp in Sources */,
@@ -13182,6 +13292,7 @@
 				F5D141261BAF0B6D0075A95C /* Observer.cpp in Sources */,
 				F5D141271BAF0B6D0075A95C /* POUtils.cpp in Sources */,
 				F5022F341E2D41D5001BBF75 /* hdhomerun_video.c in Sources */,
+				184565C41EA1F45400C5DABB /* Base64URL.cpp in Sources */,
 				F5B723AF1C7C9C1A006432AE /* AudioDSPSettings.cpp in Sources */,
 				F5D141281BAF0B6D0075A95C /* HomeShelfJob.cpp in Sources */,
 				F5D141291BAF0B6D0075A95C /* RegExp.cpp in Sources */,
@@ -13361,9 +13472,11 @@
 				F5B7226C1C7BBDD2006432AE /* DVDInputStreamBluray.cpp in Sources */,
 				F5D141B91BAF0B6D0075A95C /* SettingRequirement.cpp in Sources */,
 				F5D141BA1BAF0B6D0075A95C /* SettingSection.cpp in Sources */,
+				F534EDA41E8D8BD60009D1A1 /* EmbyViewCache.cpp in Sources */,
 				F5D141BB1BAF0B6D0075A95C /* SettingsManager.cpp in Sources */,
 				F5D141BC1BAF0B6D0075A95C /* SettingUpdate.cpp in Sources */,
 				F5D141BD1BAF0B6D0075A95C /* Utf8Utils.cpp in Sources */,
+				F5471B261E8562C100570A53 /* EmbyClient.cpp in Sources */,
 				F5D141BE1BAF0B6D0075A95C /* InfoExpression.cpp in Sources */,
 				F5D141BF1BAF0B6D0075A95C /* XSLTUtils.cpp in Sources */,
 				F5D141C01BAF0B6D0075A95C /* InfoBool.cpp in Sources */,
@@ -13456,6 +13569,7 @@
 				F5D1420C1BAF0B6D0075A95C /* NptFile.cpp in Sources */,
 				F5D1420D1BAF0B6D0075A95C /* NptHash.cpp in Sources */,
 				F5D1420E1BAF0B6D0075A95C /* NptHttp.cpp in Sources */,
+				F5471B341E85647800570A53 /* PlexClientSync.cpp in Sources */,
 				F5B724CA1C7E150C006432AE /* global.cpp in Sources */,
 				F5D1420F1BAF0B6D0075A95C /* NptJson.cpp in Sources */,
 				F5B724AF1C7E150C006432AE /* errhnd.cpp in Sources */,
@@ -13495,6 +13609,7 @@
 				F5D142291BAF0B6D0075A95C /* NptPosixSystem.cpp in Sources */,
 				F5D1422A1BAF0B6D0075A95C /* NptPosixThreads.cpp in Sources */,
 				F5D1422B1BAF0B6D0075A95C /* NptPosixTime.cpp in Sources */,
+				F5471B1A1E8562AA00570A53 /* EmbyDirectory.cpp in Sources */,
 				F5D1422C1BAF0B6D0075A95C /* NptSelectableMessageQueue.cpp in Sources */,
 				F5D1422D1BAF0B6D0075A95C /* NptBsdNetwork.cpp in Sources */,
 				F5D1422E1BAF0B6D0075A95C /* NptBsdResolver.cpp in Sources */,
@@ -13515,6 +13630,7 @@
 				F5A0E2581E3A63190086B1D1 /* BitstreamWriter.cpp in Sources */,
 				F5B723591C7C99A6006432AE /* GUIDialogVisualisationPresetList.cpp in Sources */,
 				F5D142391BAF0B6D0075A95C /* InputCodingTableBaiduPY.cpp in Sources */,
+				F5471B291E8562C100570A53 /* EmbyClientSync.cpp in Sources */,
 				F5D1423A1BAF0B6D0075A95C /* InputCodingTableBasePY.cpp in Sources */,
 				F5D1423B1BAF0B6D0075A95C /* InputCodingTableFactory.cpp in Sources */,
 			);

@@ -1268,7 +1268,7 @@ void CDVDPlayer::Process()
     double startpts = DVD_NOPTS_VALUE;
     if(m_pDemuxer)
     {
-      if (m_pDemuxer->SeekTime(starttime, false, &startpts))
+      if (m_pDemuxer->SeekTime(starttime, true, &startpts))
         CLog::Log(LOGDEBUG, "%s - starting demuxer from: %d", __FUNCTION__, starttime);
       else
         CLog::Log(LOGDEBUG, "%s - failed to start demuxing from: %d", __FUNCTION__, starttime);
@@ -1276,7 +1276,7 @@ void CDVDPlayer::Process()
 
     if(m_pSubtitleDemuxer)
     {
-      if(m_pSubtitleDemuxer->SeekTime(starttime, false, &startpts))
+      if(m_pSubtitleDemuxer->SeekTime(starttime, true, &startpts))
         CLog::Log(LOGDEBUG, "%s - starting subtitle demuxer from: %d", __FUNCTION__, starttime);
       else
         CLog::Log(LOGDEBUG, "%s - failed to start subtitle demuxing from: %d", __FUNCTION__, starttime);
@@ -2027,6 +2027,7 @@ void CDVDPlayer::HandlePlaySpeed()
       m_dvdPlayerAudio->SendMessage(new CDVDMsgDouble(CDVDMsg::GENERAL_RESYNC, clock), 1);
       m_dvdPlayerVideo->SendMessage(new CDVDMsgDouble(CDVDMsg::GENERAL_RESYNC, clock), 1);
       SetCaching(CACHESTATE_DONE);
+      UpdatePlayState(0);
 
       m_syncTimer.Set(3000);
     }
@@ -3603,6 +3604,7 @@ bool CDVDPlayer::OpenStream(CCurrentStream& current, int iStream, int source, bo
     if(!m_pSubtitleDemuxer || m_pSubtitleDemuxer->GetFileName() != st.filename)
     {
       CLog::Log(LOGNOTICE, "Opening Subtitle file: %s", st.filename.c_str());
+      SAFE_DELETE(m_pSubtitleDemuxer);
       std::unique_ptr<CDVDDemuxVobsub> demux(new CDVDDemuxVobsub());
       if(!demux->Open(st.filename, source, st.filename2))
         return false;
@@ -3776,7 +3778,14 @@ bool CDVDPlayer::OpenVideoStream(CDVDStreamInfo& hint, bool reset)
     hint.stills = true;
 
   if (hint.stereo_mode.empty())
-    hint.stereo_mode = CStereoscopicsManager::GetInstance().DetectStereoModeByString(m_item.GetPath());
+  {
+    std::string filepath;
+    if (m_item.HasVideoInfoTag() && m_item.IsMediaServiceBased())
+      filepath = m_item.GetMediaServiceFile();
+    else
+      filepath = m_item.GetPath();
+    hint.stereo_mode = CStereoscopicsManager::GetInstance().DetectStereoModeByString(filepath);
+  }
 
   SelectionStream& s = m_SelectionStreams.Get(STREAM_VIDEO, 0);
 
@@ -3847,11 +3856,11 @@ bool CDVDPlayer::OpenSubtitleStream(CDVDStreamInfo& hint)
   return true;
 }
 
-bool CDVDPlayer::AdaptForcedSubtitles()
+void CDVDPlayer::AdaptForcedSubtitles()
 {
   bool valid = false;
   SelectionStream ss = m_SelectionStreams.Get(STREAM_SUBTITLE, GetSubtitle());
-  if (ss.flags & CDemuxStream::FLAG_FORCED || !GetSubtitleVisible())
+  if (ss.flags & CDemuxStream::FLAG_FORCED)
   {
     SelectionStream as = m_SelectionStreams.Get(STREAM_AUDIO, GetAudioStream());
     SelectionStreams streams = m_SelectionStreams.Get(STREAM_SUBTITLE);
@@ -3869,11 +3878,9 @@ bool CDVDPlayer::AdaptForcedSubtitles()
     }
     if(!valid)
     {
-      CloseStream(m_CurrentSubtitle, true);
       SetSubtitleVisibleInternal(false);
     }
   }
-  return valid;
 }
 
 bool CDVDPlayer::OpenTeletextStream(CDVDStreamInfo& hint)

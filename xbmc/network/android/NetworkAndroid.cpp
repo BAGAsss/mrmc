@@ -40,9 +40,8 @@
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
-CNetworkInterfaceAndroid::CNetworkInterfaceAndroid(CJNINetwork network, const CJNINetworkInfo& ni, const CJNILinkProperties& lp, const CJNINetworkInterface& intf)
+CNetworkInterfaceAndroid::CNetworkInterfaceAndroid(CJNINetwork network, const CJNILinkProperties& lp, const CJNINetworkInterface& intf)
   : m_network(network)
-  , m_ni(ni)
   , m_lp(lp)
   , m_intf(intf)
 {
@@ -69,74 +68,145 @@ std::string& CNetworkInterfaceAndroid::GetName()
 
 bool CNetworkInterfaceAndroid::IsEnabled()
 {
-  return m_ni.isAvailable();
+  CJNIConnectivityManager connman(CXBMCApp::getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
+  CJNINetworkInfo ni = connman.getNetworkInfo(m_network);
+  if (!ni)
+    return false;
+
+  return ni.isAvailable();
 }
 
 bool CNetworkInterfaceAndroid::IsConnected()
 {
-  return m_ni.isConnected();
+  CJNIConnectivityManager connman(CXBMCApp::getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
+  CJNINetworkInfo ni = connman.getNetworkInfo(m_network);
+  if (!ni)
+    return false;
+
+  return ni.isConnected();
 }
 
 bool CNetworkInterfaceAndroid::IsWireless()
 {
-  int type = m_ni.getType();
+  CJNIConnectivityManager connman(CXBMCApp::getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
+  CJNINetworkInfo ni = connman.getNetworkInfo(m_network);
+  if (!ni)
+    return false;
+
+  int type = ni.getType();
   return !(type == CJNIConnectivityManager::TYPE_ETHERNET || type == CJNIConnectivityManager::TYPE_DUMMY);
 }
 
 std::string CNetworkInterfaceAndroid::GetMacAddress()
 {
   auto interfaceMacAddrRaw = m_intf.getHardwareAddress();
-  return (StringUtils::Format("%02X:%02X:%02X:%02X:%02X:%02X",
+  if (xbmc_jnienv()->ExceptionCheck())
+  {
+    xbmc_jnienv()->ExceptionClear();
+    CLog::Log(LOGERROR, "CNetworkInterfaceAndroid::GetMacAddress Exception getting HW address");
+    return "";
+  }
+  if (interfaceMacAddrRaw.size() >= 6)
+  {
+    return (StringUtils::Format("%02X:%02X:%02X:%02X:%02X:%02X",
                                       (uint8_t)interfaceMacAddrRaw[0],
                                       (uint8_t)interfaceMacAddrRaw[1],
                                       (uint8_t)interfaceMacAddrRaw[2],
                                       (uint8_t)interfaceMacAddrRaw[3],
                                       (uint8_t)interfaceMacAddrRaw[4],
                                       (uint8_t)interfaceMacAddrRaw[5]));
+  }
+  return "";
 }
 
 void CNetworkInterfaceAndroid::GetMacAddressRaw(char rawMac[6])
 {
   auto interfaceMacAddrRaw = m_intf.getHardwareAddress();
-  memcpy(rawMac, interfaceMacAddrRaw.data(), 6);
-
+  if (xbmc_jnienv()->ExceptionCheck())
+  {
+    xbmc_jnienv()->ExceptionClear();
+    CLog::Log(LOGERROR, "CNetworkInterfaceAndroid::GetMacAddress Exception getting HW address");
+    return;
+  }
+  if (interfaceMacAddrRaw.size() >= 6)
+    memcpy(rawMac, interfaceMacAddrRaw.data(), 6);
 }
 
 bool CNetworkInterfaceAndroid::GetHostMacAddress(in_addr_t host_ip, std::string& mac)
 {
-  struct arpreq areq;
-  struct sockaddr_in* sin;
-
-  memset(&areq, 0x0, sizeof(areq));
-
-  sin = (struct sockaddr_in *) &areq.arp_pa;
-  sin->sin_family = AF_INET;
-  sin->sin_addr.s_addr = host_ip;
-
-  sin = (struct sockaddr_in *) &areq.arp_ha;
-  sin->sin_family = ARPHRD_ETHER;
-
-  strncpy(areq.arp_dev, m_name.c_str(), sizeof(areq.arp_dev));
-  areq.arp_dev[sizeof(areq.arp_dev)-1] = '\0';
-
-  int sock = socket(AF_INET, SOCK_DGRAM, 0);
-  int result = ioctl(sock, SIOCGARP, (caddr_t) &areq);
-  close(sock);
-
-  if (result != 0)
+  CLog::Log(LOGDEBUG, "CNetworkInterfaceAndroid::GetHostMacAddress");
+  if (CJNIAudioManager::GetSDKVersion() < 23)
   {
-//  CLog::Log(LOGERROR, "%s - GetHostMacAddress/ioctl failed with errno (%d)", __FUNCTION__, errno);
-    return false;
+    struct arpreq areq;
+    struct sockaddr_in* sin;
+
+    memset(&areq, 0x0, sizeof(areq));
+
+    sin = (struct sockaddr_in *) &areq.arp_pa;
+    sin->sin_family = AF_INET;
+    sin->sin_addr.s_addr = host_ip;
+
+    sin = (struct sockaddr_in *) &areq.arp_ha;
+    sin->sin_family = ARPHRD_ETHER;
+
+    strncpy(areq.arp_dev, m_name.c_str(), sizeof(areq.arp_dev));
+    areq.arp_dev[sizeof(areq.arp_dev)-1] = '\0';
+
+    int sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock != -1)
+    {
+      int result = ioctl(sock, SIOCGARP, (caddr_t) &areq);
+      close(sock);
+
+      if (result < 0)
+      {
+        CLog::Log(LOGERROR, "%s - GetHostMacAddress/ioctl failed with errno (%d)", __FUNCTION__, errno);
+        return false;
+      }
+    }
+    else
+    {
+      return false;
+    }
+
+    struct sockaddr* res = &areq.arp_ha;
+    mac = StringUtils::Format("%02X:%02X:%02X:%02X:%02X:%02X",
+      (uint8_t) res->sa_data[0], (uint8_t) res->sa_data[1], (uint8_t) res->sa_data[2],
+      (uint8_t) res->sa_data[3], (uint8_t) res->sa_data[4], (uint8_t) res->sa_data[5]);
+
+    for (int i=0; i<6; ++i)
+      if (res->sa_data[i])
+        return true;
   }
+  else
+  {
+    // SIOCGARP is forbidden for API24+, use ip neigh show and pray
+    struct in_addr hostIP;
+    hostIP.s_addr = host_ip;
+    char *remoteIP = inet_ntoa(hostIP);
 
-  struct sockaddr* res = &areq.arp_ha;
-  mac = StringUtils::Format("%02X:%02X:%02X:%02X:%02X:%02X",
-    (uint8_t) res->sa_data[0], (uint8_t) res->sa_data[1], (uint8_t) res->sa_data[2], 
-    (uint8_t) res->sa_data[3], (uint8_t) res->sa_data[4], (uint8_t) res->sa_data[5]);
+    char buffer[512];
+    std::vector<std::string> result;
 
-  for (int i=0; i<6; ++i)
-    if (res->sa_data[i])
+    FILE *pipe = popen("ip neigh show", "r");
+    while (fgets(buffer, sizeof(buffer), pipe))
+    {
+      // 192.168.2.124 dev wlan0 lladdr f8:04:2e:e7:47:c2 STALE
+      if (std::string(buffer).find(remoteIP) != std::string::npos)
+      {
+        result = StringUtils::Split(buffer, " ");
+        if (result.size() > 4)
+        {
+          mac = result[4];
+          CLog::Log(LOGDEBUG, "%s - IP(%s), MAC(%s)", __FUNCTION__, result[0].c_str(), mac.c_str());
+          break;
+        }
+      }
+    }
+    pclose(pipe);
+    if (result.size())
       return true;
+  }
 
   return false;
 }
@@ -204,7 +274,12 @@ std::string CNetworkInterfaceAndroid::GetCurrentWirelessEssId()
 {
   std::string ret;
 
-  if (m_ni.getType() == CJNIConnectivityManager::TYPE_WIFI)
+  CJNIConnectivityManager connman(CXBMCApp::getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
+  CJNINetworkInfo ni = connman.getNetworkInfo(m_network);
+  if (!ni)
+    return "";
+
+  if (ni.getType() == CJNIConnectivityManager::TYPE_WIFI)
   {
     CJNIWifiManager wm = CXBMCApp::getSystemService("wifi");
     if (wm.isWifiEnabled())
@@ -240,6 +315,14 @@ CNetworkAndroid::CNetworkAndroid()
   RetrieveInterfaces();
 }
 
+CNetworkAndroid::~CNetworkAndroid()
+{
+  for (auto intf : m_interfaces)
+    delete intf;
+  for (auto intf : m_oldInterfaces)
+    delete intf;
+}
+
 bool CNetworkAndroid::GetHostName(std::string& hostname)
 {
   hostname = CJNIInetAddress::getLocalHost().getHostName();
@@ -248,11 +331,14 @@ bool CNetworkAndroid::GetHostName(std::string& hostname)
 
 std::vector<CNetworkInterface*>& CNetworkAndroid::GetInterfaceList()
 {
+  CSingleLock lock(m_refreshMutex);
   return m_interfaces;
 }
 
 CNetworkInterface* CNetworkAndroid::GetFirstConnectedInterface()
 {
+  CSingleLock lock(m_refreshMutex);
+
   for(CNetworkInterface* intf : m_interfaces)
   {
     if (intf->IsEnabled() && intf->IsConnected() && !intf->GetCurrentDefaultGateway().empty())
@@ -264,18 +350,14 @@ CNetworkInterface* CNetworkAndroid::GetFirstConnectedInterface()
 
 bool CNetworkAndroid::PingHost(in_addr_t remote_ip, unsigned int timeout_ms)
 {
-  char cmd_line [64];
 
   struct in_addr host_ip;
   host_ip.s_addr = remote_ip;
+  CLog::Log(LOGDEBUG, "CNetworkAndroid::PingHost: '%s'", inet_ntoa(host_ip));
 
-  #if defined (TARGET_DARWIN_OSX) || defined (TARGET_FREEBSD)
-    sprintf(cmd_line, "ping -c 1 -t %d %s", timeout_ms / 1000 + (timeout_ms % 1000) != 0, inet_ntoa(host_ip));
-  #else
-    sprintf(cmd_line, "ping -c 1 -w %d %s", timeout_ms / 1000 + (timeout_ms % 1000) != 0, inet_ntoa(host_ip));
-  #endif
-
-  int status = system (cmd_line);
+  char cmd_line [64];
+  sprintf(cmd_line, "ping -c 1 -w %d %s", timeout_ms / 1000 + (timeout_ms % 1000) != 0, inet_ntoa(host_ip));
+  int status = system(cmd_line);
 
   int result = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
 
@@ -306,20 +388,35 @@ void CNetworkAndroid::SetNameServers(const std::vector<std::string>& nameServers
 
 void CNetworkAndroid::RetrieveInterfaces()
 {
+  CSingleLock lock(m_refreshMutex);
+
+  // Cannot delete interfaces here, as there still might have references to it
+  for (auto intf : m_oldInterfaces)
+    delete intf;
+  m_oldInterfaces = m_interfaces;
+  m_interfaces.clear();
+
   CJNIConnectivityManager connman(CXBMCApp::getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
   std::vector<CJNINetwork> networks = connman.getAllNetworks();
 
   for (auto n : networks)
   {
-    CJNINetworkInfo ni = connman.getNetworkInfo(n);
     CJNILinkProperties lp = connman.getLinkProperties(n);
     if (lp)
     {
       CJNINetworkInterface intf = CJNINetworkInterface::getByName(lp.getInterfaceName());
+      if (xbmc_jnienv()->ExceptionCheck())
+      {
+        xbmc_jnienv()->ExceptionClear();
+        CLog::Log(LOGERROR, "CNetworkAndroid::RetrieveInterfaces Cannot get interface by name: %s", lp.getInterfaceName().c_str());
+        continue;
+      }
       if (intf)
-        m_interfaces.push_back(new CNetworkInterfaceAndroid(n, ni, lp, intf));
+        m_interfaces.push_back(new CNetworkInterfaceAndroid(n, lp, intf));
       else
         CLog::Log(LOGERROR, "CNetworkAndroid::RetrieveInterfaces Cannot get interface by name: %s", lp.getInterfaceName().c_str());
     }
+    else
+      CLog::Log(LOGERROR, "CNetworkAndroid::RetrieveInterfaces Cannot get link properties for network: %s", n.toString().c_str());
   }
 }

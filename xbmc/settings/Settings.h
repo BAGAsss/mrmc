@@ -60,6 +60,7 @@ public:
   static const std::string SETTING_LOOKANDFEEL_RSSINTERVAL;
   static const std::string SETTING_LOOKANDFEEL_RSSRTL;
   static const std::string SETTING_LOOKANDFEEL_STEREOSTRENGTH;
+  static const std::string SETTING_LOOKANDFEEL_NEWSKINCHECKED;
   static const std::string SETTING_LOCALE_LANGUAGE;
   static const std::string SETTING_LOCALE_COUNTRY;
   static const std::string SETTING_LOCALE_CHARSET;
@@ -89,7 +90,7 @@ public:
   static const std::string SETTING_WINDOW_WIDTH;
   static const std::string SETTING_WINDOW_HEIGHT;
   static const std::string SETTING_VIDEOLIBRARY_SHOWUNWATCHEDPLOTS;
-  static const std::string SETTING_VIDEOLIBRARY_SHOWINPROGRESS;
+  static const std::string SETTING_VIDEOLIBRARY_HOMESHELFITEMS;
   static const std::string SETTING_VIDEOLIBRARY_ACTORTHUMBS;
   static const std::string SETTING_MYVIDEOS_FLATTEN;
   static const std::string SETTING_VIDEOLIBRARY_FLATTENTVSHOWS;
@@ -124,7 +125,9 @@ public:
   static const std::string SETTING_VIDEOPLAYER_RENDERMETHOD;
   static const std::string SETTING_VIDEOPLAYER_HQSCALERS;
   static const std::string SETTING_VIDEOPLAYER_USEMEDIACODEC;
+  static const std::string SETTING_VIDEOPLAYER_USEMEDIACODEC_INTERLACED;
   static const std::string SETTING_VIDEOPLAYER_USEMEDIACODECSURFACE;
+  static const std::string SETTING_VIDEOPLAYER_USEMEDIACODECSURFACE_INTERLACED;
   static const std::string SETTING_VIDEOPLAYER_USEVDPAU;
   static const std::string SETTING_VIDEOPLAYER_USEVDPAUMIXER;
   static const std::string SETTING_VIDEOPLAYER_USEVDPAUMPEG2;
@@ -224,6 +227,7 @@ public:
   static const std::string SETTING_PVRPARENTAL_PIN;
   static const std::string SETTING_PVRPARENTAL_DURATION;
   static const std::string SETTING_PVRCLIENT_MENUHOOK;
+  static const std::string SETTING_PVRCLIENT_BROWSER;
   static const std::string SETTING_PVRTIMERS_TIMERTYPEFILTER;
   static const std::string SETTING_MUSICLIBRARY_SHOWCOMPILATIONARTISTS;
   static const std::string SETTING_MUSICLIBRARY_DOWNLOADINFO;
@@ -325,6 +329,7 @@ public:
   static const std::string SETTING_AUDIOOUTPUT_PROCESSQUALITY;
   static const std::string SETTING_AUDIOOUTPUT_ATEMPOTHRESHOLD;
   static const std::string SETTING_AUDIOOUTPUT_STREAMSILENCE;
+  static const std::string SETTING_AUDIOOUTPUT_STREAMSILENCENOISEINDEX;
   static const std::string SETTING_AUDIOOUTPUT_DSPADDONSENABLED;
   static const std::string SETTING_AUDIOOUTPUT_DSPSETTINGS;
   static const std::string SETTING_AUDIOOUTPUT_DSPRESETDB;
@@ -400,6 +405,7 @@ public:
   static const std::string SETTING_MYSQL_PORT;
   static const std::string SETTING_MYSQL_USER;
   static const std::string SETTING_MYSQL_PASS;
+  static const std::string SETTING_MYSQL_TIMEOUT;
   static const std::string SETTING_MYSQL_VIDEO;
   static const std::string SETTING_MYSQL_MUSIC;
   static const std::string SETTING_THUMBNAILS_CLEANUP;
@@ -432,6 +438,17 @@ public:
   static const std::string SETTING_SERVICES_PLEXTRANSCODEAUDIO;
   static const std::string SETTING_SERVICES_PLEXTRANSCODELOCALEXCLUSION;
   static const std::string SETTING_SERVICES_PLEXMYPLEXAUTH;
+  static const std::string SETTING_SERVICES_PLEXLIMITHOMETO;
+
+  // emby services
+  static const std::string SETTING_SERVICES_EMBYSIGNIN;
+  static const std::string SETTING_SERVICES_EMBYSIGNINPIN;
+  static const std::string SETTING_SERVICES_EMBYSERVERSOURCES;
+  static const std::string SETTING_SERVICES_EMBYUSERID;
+  static const std::string SETTING_SERVICES_EMBYSERVERURL;
+  static const std::string SETTING_SERVICES_EMBYACESSTOKEN;
+  static const std::string SETTING_SERVICES_EMBYSAVEDSOURCES;
+  static const std::string SETTING_SERVICES_EMBYLIMITHOMETO;
 
   /*!
    \brief Creates a new settings wrapper around a new settings manager.

@@ -228,6 +228,13 @@ public:
   bool IsLiveTV() const;
   bool IsMediaServiceBased() const;
   bool IsMediaServicesCloudItem() const;
+  void SetMediaServiceId(const std::string &Id) { m_strServiceId = Id; };
+  const std::string& GetMediaServiceId() const { return m_strServiceId; };
+  void SetMediaServiceFile(const std::string &Id) { m_strServiceFile = Id; };
+  const std::string& GetMediaServiceFile() const { return m_strServiceFile; };
+  void SetMediaServiceExtras(const std::string &Extras) { m_strServiceExtras = Extras; };
+  const std::string& GetMediaServiceExtras() const { return m_strServiceExtras; };
+
   bool IsRSS() const;
   bool IsAndroidApp() const;
   bool IsAndroidSetting() const;
@@ -536,6 +543,9 @@ private:
   bool m_bIsAlbum;
 
   CCueDocumentPtr m_cueDocument;
+  std::string m_strServiceId;
+  std::string m_strServiceFile;
+  std::string m_strServiceExtras;
 };
 
 /*!
